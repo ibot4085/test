@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سڕینەوەی زیرەکی شت لە وێنە</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #4a5568;
+            font-size: 1.1rem;
+        }
+
+        .upload-section {
+            border: 3px dashed #cbd5e0;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #f7fafc, #edf2f7);
+        }
+
+        .upload-section:hover {
+            border-color: #667eea;
+            background: linear-gradient(45deg, #edf2f7, #e2e8f0);
+            transform: translateY(-2px);
+        }
+
+        .upload-section.dragover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .editor-container {
+            display: none;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .canvas-container {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            background: #f8f9fa;
+        }
+
+        #imageCanvas {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            cursor: crosshair;
+        }
+
+        .tools-panel {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .tool-group {
+            margin-bottom: 25px;
+        }
+
+        .tool-group h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .brush-size {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn.remove {
+            background: linear-gradient(45deg, #e53e3e, #c53030);
+            color: white;
+        }
+
+        .action-btn.remove:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(229, 62, 62, 0.3);
+        }
+
+        .action-btn.undo {
+            background: linear-gradient(45deg, #4299e1, #3182ce);
+            color: white;
+        }
+
+        .action-btn.undo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(66, 153, 225, 0.3);
+        }
+
+        .action-btn.download {
+            background: linear-gradient(45deg, #38a169, #2f855a);
+            color: white;
+        }
+
+        .action-btn.download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(56, 161, 105, 0.3);
+        }
+
+        .brush-preview {
+            width: 80px;
+            height: 80px;
+            border: 3px solid #e2e8f0;
+            border-radius: 15px;
+            margin: 15px auto;
+            position: relative;
+            background: linear-gradient(135deg, #f7fafc, #edf2f7);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .brush-preview::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            width: var(--brush-size, 20px);
+            height: var(--brush-size, 20px);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        .brush-preview::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px dashed #667eea;
+            border-radius: 50%;
+            width: calc(var(--brush-size, 20px) + 10px);
+            height: calc(var(--brush-size, 20px) + 10px);
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        @keyframes rotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .smart-brush-cursor {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1000;
+            border: 3px solid #667eea;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 0 2px white, 0 0 20px rgba(102, 126, 234, 0.5);
+            animation: cursorPulse 1.5s infinite;
+        }
+
+        @keyframes cursorPulse {
+            0%, 100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        .selection-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            mix-blend-mode: multiply;
+        }
+
+        .ai-detection-hint {
+            background: linear-gradient(45deg, #38a169, #2f855a);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin: 10px 0;
+            text-align: center;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>سڕینەوەی زیرەکی شت لە وێنە</h1>
+            <p>وێنەکەت هەڵبژێرە و شتەکانی ناخوازراوت لێ بسڕەوە بە شێوەیەکی زیرەک</p>
+        </div>
+
+        <div class="upload-section" id="uploadSection">
+            <div>
+                <h2>وێنەکەت بخەرە ئێرە</h2>
+                <p>یان کلیک بکە بۆ هەڵبژاردن</p>
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    هەڵبژاردنی وێنە
+                </button>
+                <input type="file" id="fileInput" class="file-input" accept="image/*">
+            </div>
+        </div>
+
+        <div class="editor-container" id="editorContainer">
+            <div class="canvas-container">
+                <canvas id="imageCanvas"></canvas>
+            </div>
+            
+            <div class="tools-panel">
+                <div class="tool-group">
+                    <h3>فرچەی زیرەک</h3>
+                    <div class="ai-detection-hint">
+                        🎯 فرچەی زیرەک - خۆکارانە لێوارەکان دەناسێتەوە
+                    </div>
+                    <label for="brushSize">قەبارەی فرچە: <span id="brushSizeValue">20</span>px</label>
+                    <input type="range" id="brushSize" class="brush-size" min="10" max="80" value="20">
+                    <div class="brush-preview" id="brushPreview"></div>
+                    
+                    <div style="margin-top: 15px;">
+                        <label>
+                            <input type="checkbox" id="smartMode" checked> 
+                            دۆخی زیرەک - خۆکارانە لێوارەکان بدۆزێتەوە
+                        </label>
+                    </div>
+                </div>
+
+                <div class="tool-group">
+                    <h3>کارەکان</h3>
+                    <button class="action-btn remove" id="removeBtn">
+                        سڕینەوەی ناوچەکان
+                    </button>
+                    <button class="action-btn undo" id="undoBtn">
+                        گەڕاندنەوە
+                    </button>
+                    <button class="action-btn download" id="downloadBtn">
+                        دابەزاندنی وێنە
+                    </button>
+                </div>
+
+                <div class="tool-group">
+                    <h3>ڕێنمایی</h3>
+                    <p style="font-size: 0.9rem; color: #666;">
+                        ١. فرچەکە بەکار بهێنە بۆ نیشانکردنی ئەو شتانەی دەتەوێت بیانسڕیتەوە
+                        <br><br>
+                        ٢. دوگمەی "سڕینەوەی ناوچەکان" کلیک بکە
+                        <br><br>
+                        ٣. وێنەکە دابەزێنە
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('imageCanvas');
+        const ctx = canvas.getContext('2d');
+        const fileInput = document.getElementById('fileInput');
+        const uploadSection = document.getElementById('uploadSection');
+        const editorContainer = document.getElementById('editorContainer');
+        const brushSizeSlider = document.getElementById('brushSize');
+        const brushSizeValue = document.getElementById('brushSizeValue');
+        const brushPreview = document.getElementById('brushPreview');
+        const smartModeCheckbox = document.getElementById('smartMode');
+        const removeBtn = document.getElementById('removeBtn');
+        const undoBtn = document.getElementById('undoBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        let originalImage = null;
+        let maskCanvas = null;
+        let maskCtx = null;
+        let isDrawing = false;
+        let brushSize = 20;
+        let smartMode = true;
+        let imageHistory = [];
+        let customCursor = null;
+        let lastDrawPoint = null;
+
+        // Initialize
+        updateBrushPreview();
+
+        // File input handler
+        fileInput.addEventListener('change', handleFileSelect);
+
+        // Drag and drop
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('dragover');
+        });
+
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // Brush size slider
+        brushSizeSlider.addEventListener('input', (e) => {
+            brushSize = parseInt(e.target.value);
+            brushSizeValue.textContent = brushSize;
+            updateBrushPreview();
+            updateCustomCursor();
+        });
+
+        // Smart mode toggle
+        smartModeCheckbox.addEventListener('change', (e) => {
+            smartMode = e.target.checked;
+        });
+
+        // Canvas drawing with smart features
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        canvas.addEventListener('mouseenter', showCustomCursor);
+        canvas.addEventListener('mouseleave', hideCustomCursor);
+
+        // Touch events for mobile
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousedown', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const mouseEvent = new MouseEvent('mouseup', {});
+            canvas.dispatchEvent(mouseEvent);
+        });
+
+        // Action buttons
+        removeBtn.addEventListener('click', removeSelectedAreas);
+        undoBtn.addEventListener('click', undo);
+        downloadBtn.addEventListener('click', downloadImage);
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('تکایە فایلی وێنە هەڵبژێرە');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    originalImage = img;
+                    setupCanvas(img);
+                    uploadSection.style.display = 'none';
+                    editorContainer.style.display = 'grid';
+                    saveToHistory();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function setupCanvas(img) {
+            // Set canvas size to match image
+            canvas.width = img.width;
+            canvas.height = img.height;
+            
+            // Draw image on main canvas
+            ctx.drawImage(img, 0, 0);
+            
+            // Create mask canvas
+            maskCanvas = document.createElement('canvas');
+            maskCanvas.width = img.width;
+            maskCanvas.height = img.height;
+            maskCtx = maskCanvas.getContext('2d');
+            
+            // Create custom cursor
+            createCustomCursor();
+        }
+
+        function updateBrushPreview() {
+            brushPreview.style.setProperty('--brush-size', brushSize + 'px');
+        }
+
+        function createCustomCursor() {
+            if (customCursor) {
+                customCursor.remove();
+            }
+            
+            customCursor = document.createElement('div');
+            customCursor.className = 'smart-brush-cursor';
+            customCursor.style.width = brushSize + 'px';
+            customCursor.style.height = brushSize + 'px';
+            customCursor.style.display = 'none';
+            document.body.appendChild(customCursor);
+        }
+
+        function updateCustomCursor() {
+            if (customCursor) {
+                customCursor.style.width = brushSize + 'px';
+                customCursor.style.height = brushSize + 'px';
+            }
+        }
+
+        function showCustomCursor() {
+            canvas.style.cursor = 'none';
+            if (customCursor) {
+                customCursor.style.display = 'block';
+            }
+        }
+
+        function hideCustomCursor() {
+            canvas.style.cursor = 'crosshair';
+            if (customCursor) {
+                customCursor.style.display = 'none';
+            }
+        }
+
+        function handleMouseMove(e) {
+            if (customCursor) {
+                customCursor.style.left = e.clientX + 'px';
+                customCursor.style.top = e.clientY + 'px';
+            }
+            
+            if (isDrawing) {
+                draw(e);
+            }
+        }
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            return {
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
+            };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getMousePos(e);
+            lastDrawPoint = pos;
+            drawMask(pos.x, pos.y);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getMousePos(e);
+            
+            if (smartMode && lastDrawPoint) {
+                // Smart drawing with interpolation
+                drawSmartLine(lastDrawPoint.x, lastDrawPoint.y, pos.x, pos.y);
+            } else {
+                drawMask(pos.x, pos.y);
+            }
+            
+            lastDrawPoint = pos;
+        }
+
+        function drawSmartLine(x1, y1, x2, y2) {
+            const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+            const steps = Math.max(1, Math.floor(distance / (brushSize / 4)));
+            
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const x = x1 + (x2 - x1) * t;
+                const y = y1 + (y2 - y1) * t;
+                drawMask(x, y);
+            }
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function drawMask(x, y) {
+            // Smart edge detection for better selection
+            if (smartMode) {
+                drawSmartMask(x, y);
+            } else {
+                drawBasicMask(x, y);
+            }
+
+            // Draw mask overlay on main canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(originalImage, 0, 0);
+            
+            // Apply glowing mask effect
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.shadowColor = 'rgba(102, 126, 234, 0.8)';
+            ctx.shadowBlur = 10;
+            ctx.drawImage(maskCanvas, 0, 0);
+            ctx.shadowBlur = 0;
+            ctx.globalCompositeOperation = 'source-over';
+        }
+
+        function drawBasicMask(x, y) {
+            maskCtx.globalCompositeOperation = 'source-over';
+            
+            // Create gradient brush for smoother edges
+            const gradient = maskCtx.createRadialGradient(x, y, 0, x, y, brushSize / 2);
+            gradient.addColorStop(0, 'rgba(255, 100, 100, 0.8)');
+            gradient.addColorStop(0.7, 'rgba(255, 100, 100, 0.6)');
+            gradient.addColorStop(1, 'rgba(255, 100, 100, 0.2)');
+            
+            maskCtx.fillStyle = gradient;
+            maskCtx.beginPath();
+            maskCtx.arc(x, y, brushSize / 2, 0, 2 * Math.PI);
+            maskCtx.fill();
+        }
+
+        function drawSmartMask(x, y) {
+            // Get surrounding pixel data for edge detection
+            const imageData = ctx.getImageData(Math.max(0, x - brushSize), 
+                                             Math.max(0, y - brushSize), 
+                                             Math.min(canvas.width, brushSize * 2), 
+                                             Math.min(canvas.height, brushSize * 2));
+            
+            // Smart brush that adapts to edges
+            const centerColor = getPixelColor(Math.floor(x), Math.floor(y));
+            
+            maskCtx.globalCompositeOperation = 'source-over';
+            
+            // Adaptive brush size based on edge detection
+            const adaptiveBrushSize = detectEdges(x, y) ? brushSize * 0.7 : brushSize;
+            
+            const gradient = maskCtx.createRadialGradient(x, y, 0, x, y, adaptiveBrushSize / 2);
+            gradient.addColorStop(0, 'rgba(255, 120, 120, 0.9)');
+            gradient.addColorStop(0.6, 'rgba(255, 120, 120, 0.7)');
+            gradient.addColorStop(1, 'rgba(255, 120, 120, 0.3)');
+            
+            maskCtx.fillStyle = gradient;
+            maskCtx.beginPath();
+            maskCtx.arc(x, y, adaptiveBrushSize / 2, 0, 2 * Math.PI);
+            maskCtx.fill();
+        }
+
+        function getPixelColor(x, y) {
+            if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) {
+                return { r: 0, g: 0, b: 0, a: 0 };
+            }
+            
+            const imageData = ctx.getImageData(x, y, 1, 1);
+            return {
+                r: imageData.data[0],
+                g: imageData.data[1],
+                b: imageData.data[2],
+                a: imageData.data[3]
+            };
+        }
+
+        function detectEdges(x, y) {
+            const centerColor = getPixelColor(Math.floor(x), Math.floor(y));
+            const threshold = 30;
+            
+            // Check surrounding pixels for significant color differences
+            for (let dx = -2; dx <= 2; dx++) {
+                for (let dy = -2; dy <= 2; dy++) {
+                    if (dx === 0 && dy === 0) continue;
+                    
+                    const neighborColor = getPixelColor(Math.floor(x + dx), Math.floor(y + dy));
+                    const colorDiff = Math.abs(centerColor.r - neighborColor.r) +
+                                    Math.abs(centerColor.g - neighborColor.g) +
+                                    Math.abs(centerColor.b - neighborColor.b);
+                    
+                    if (colorDiff > threshold) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function removeSelectedAreas() {
+            if (!maskCanvas) return;
+
+            saveToHistory();
+
+            // Advanced inpainting with better results
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const maskData = maskCtx.getImageData(0, 0, canvas.width, canvas.height);
+
+            // Multi-pass inpainting for better quality
+            for (let pass = 0; pass < 3; pass++) {
+                for (let i = 0; i < maskData.data.length; i += 4) {
+                    const alpha = maskData.data[i + 3];
+                    if (alpha > 50) { // Threshold for mask detection
+                        const x = (i / 4) % canvas.width;
+                        const y = Math.floor(i / 4 / canvas.width);
+                        
+                        const avgColor = getSmartAverageColor(imageData, x, y, maskData, pass);
+                        
+                        imageData.data[i] = avgColor.r;
+                        imageData.data[i + 1] = avgColor.g;
+                        imageData.data[i + 2] = avgColor.b;
+                    }
+                }
+            }
+
+            // Apply the modified image data
+            ctx.putImageData(imageData, 0, 0);
+
+            // Clear mask
+            maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+        }
+
+        function getSmartAverageColor(imageData, x, y, maskData, pass) {
+            let r = 0, g = 0, b = 0, count = 0;
+            const radius = Math.max(brushSize + pass * 5, 25);
+
+            // Sample in a spiral pattern for better blending
+            for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
+                for (let dist = 5; dist <= radius; dist += 3) {
+                    const nx = Math.round(x + Math.cos(angle) * dist);
+                    const ny = Math.round(y + Math.sin(angle) * dist);
+                    
+                    if (nx >= 0 && nx < canvas.width && ny >= 0 && ny < canvas.height) {
+                        const idx = (ny * canvas.width + nx) * 4;
+                        
+                        // Check if this pixel is not masked
+                        if (maskData.data[idx + 3] < 50) {
+                            const weight = 1 / (1 + dist / 10); // Distance-based weighting
+                            r += imageData.data[idx] * weight;
+                            g += imageData.data[idx + 1] * weight;
+                            b += imageData.data[idx + 2] * weight;
+                            count += weight;
+                        }
+                    }
+                }
+            }
+
+            if (count === 0) {
+                return { r: 240, g: 240, b: 240 }; // Light gray fallback
+            }
+
+            return {
+                r: Math.round(r / count),
+                g: Math.round(g / count),
+                b: Math.round(b / count)
+            };
+        }
+
+        function saveToHistory() {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            imageHistory.push(imageData);
+            
+            // Keep only last 10 states
+            if (imageHistory.length > 10) {
+                imageHistory.shift();
+            }
+        }
+
+        function undo() {
+            if (imageHistory.length > 1) {
+                imageHistory.pop(); // Remove current state
+                const previousState = imageHistory[imageHistory.length - 1];
+                ctx.putImageData(previousState, 0, 0);
+                
+                // Clear mask
+                if (maskCtx) {
+                    maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+                }
+            }
+        }
+
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'edited-image.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
+</body>
+</html>
