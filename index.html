@@ -1,55 +1,65 @@
 <!DOCTYPE html>
-<html lang="ckb" dir="rtl">
+<html lang="ku" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>سڕینەوەی زیرەکی شت لە ویەنە</title>
+  <title>سڕینەوەی ئۆبژێکت لە وێنە</title>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600&display=swap">
   <style>
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Rubik', sans-serif;
-      background: linear-gradient(to right, #667eea, #764ba2);
-      color: #2d3748;
+      font-family: 'Noto Sans Arabic', sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      color: #f8f9fa;
+      min-height: 100vh;
     }
 
     .container {
-      max-width: 1000px;
-      margin: 30px auto;
-      background: #fff;
-      border-radius: 20px;
-      padding: 30px;
-      box-shadow: 0 0 40px rgba(0,0,0,0.1);
+      max-width: 900px;
+      margin: 20px auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
 
     h1 {
-      font-size: 2.5rem;
+      font-size: 2.2rem;
       text-align: center;
-      background: linear-gradient(45deg, #667eea, #764ba2);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: #1e3c72;
+      margin-bottom: 10px;
+      font-weight: 700;
     }
 
     p.description {
       text-align: center;
-      font-size: 1.1rem;
-      color: #4a5568;
+      font-size: 1rem;
+      color: #495057;
+      margin-bottom: 30px;
     }
 
     .upload {
-      border: 3px dashed #cbd5e0;
-      padding: 40px;
+      border: 3px dashed #adb5bd;
+      padding: 30px;
       text-align: center;
-      border-radius: 15px;
-      background: #f7fafc;
+      border-radius: 12px;
+      background: #f8f9fa;
       cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 20px;
     }
 
     .upload:hover {
-      background: #edf2f7;
-      border-color: #667eea;
+      background: #e9ecef;
+      border-color: #1e3c72;
+    }
+
+    .upload p {
+      color: #343a40;
+      font-size: 1.1rem;
+      margin: 0;
     }
 
     .hidden {
@@ -60,59 +70,100 @@
       display: block;
       margin: 20px auto;
       max-width: 100%;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
+      border: 2px solid #dee2e6;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
     .tools {
       display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 20px;
+      justify-content: center;
+      gap: 15px;
+      margin: 25px 0;
+      flex-wrap: wrap;
     }
 
     .tools button {
-      padding: 12px;
+      padding: 12px 25px;
       font-size: 1rem;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      min-width: 150px;
     }
 
-    .remove-btn { background: #e53e3e; color: #fff; }
-    .remove-btn:hover { background: #c53030; }
+    .remove-btn { 
+      background: #d62828; 
+      color: #fff; 
+    }
+    .remove-btn:hover { 
+      background: #ba181b; 
+      transform: translateY(-2px);
+    }
 
-    .undo-btn { background: #3182ce; color: #fff; }
-    .undo-btn:hover { background: #2b6cb0; }
+    .undo-btn { 
+      background: #003049; 
+      color: #fff; 
+    }
+    .undo-btn:hover { 
+      background: #012036; 
+      transform: translateY(-2px);
+    }
 
-    .download-btn { background: #38a169; color: #fff; }
-    .download-btn:hover { background: #2f855a; }
+    .download-btn { 
+      background: #2a9d8f; 
+      color: #fff; 
+    }
+    .download-btn:hover { 
+      background: #21867a; 
+      transform: translateY(-2px);
+    }
 
     .footer {
       margin-top: 30px;
       text-align: center;
-      font-size: 0.9rem;
-      color: #718096;
+      font-size: 0.85rem;
+      color: #6c757d;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        margin: 10px;
+        padding: 15px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .tools {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .tools button {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>سڕینەوەی زیرەکی شت لە ویەنە</h1>
-    <p class="description">ویەنەکەت هەڕبژێرە و شتەکانی ناخوازراو لەی بسڕەوە
-    </p>
+    <h1>سڕینەوەی ئۆبژێکت لە وێنە</h1>
+    <p class="description">وێنەکەت هەڵبژێرە و ئۆبژێکتە نەخوازراوەکان بسڕەوە</p>
     <div class="upload" onclick="document.getElementById('fileInput').click()">
-      <p>لحەە بو هەلبژاردنی ویەنەیک</p>
+      <p>کرتە بکە بۆ هەڵبژاردنی وێنە</p>
       <input type="file" id="fileInput" accept="image/*" class="hidden">
     </div>
     <canvas id="canvas"></canvas>
     <div class="tools">
       <button class="remove-btn">سڕینەوەی ناوچە</button>
       <button class="undo-btn">گەڕاندنەوە</button>
-      <button class="download-btn">دابەزاندن</button>
+      <button class="download-btn">داگرتن</button>
     </div>
-    <div class="footer">Created by Ibrahim Mala Taha</div>
+    <div class="footer">دروستکراو لەلایەن ئیبراهیم مالا تاهە</div>
   </div>
   <script>
     // JavaScript here to handle image upload, draw, remove and download
