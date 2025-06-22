@@ -1,14 +1,31 @@
 <!DOCTYPE html>
 <html lang="ckb" dir="rtl">
 <head>
-   <meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سڕینەوەی زیرەکی شت لە وێنە</title>
+    <title>سڕینەوەی زیرەکی شت لە وێنە - Intelligent Object Removal</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.0"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* CSSەکان لێرەن */
-    </style>
-    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --accent-color: #fd79a8;
+            --success-color: #00b894;
+            --warning-color: #fdcb6e;
+            --danger-color: #d63031;
+            --light-color: #f5f6fa;
+            --dark-color: #2d3436;
+            --text-color: #2d3748;
+            --text-light: #718096;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -16,63 +33,123 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
             direction: rtl;
+            color: var(--text-color);
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-lg);
             backdrop-filter: blur(10px);
             position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            z-index: -1;
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         .header {
             text-align: center;
             margin-bottom: 30px;
+            position: relative;
         }
 
         .header h1 {
-            color: #2d3748;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: var(--text-color);
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #6c5ce7, #a29bfe);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+
+        .header h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #6c5ce7, #a29bfe);
+            border-radius: 2px;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
         .header p {
-            color: #4a5568;
-            font-size: 1.1rem;
+            color: var(--text-light);
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
         }
 
         .upload-section {
-            border: 3px dashed #cbd5e0;
-            border-radius: 15px;
-            padding: 40px;
+            border: 3px dashed var(--secondary-color);
+            border-radius: 20px;
+            padding: 60px 40px;
             text-align: center;
             margin-bottom: 30px;
-            transition: all 0.3s ease;
-            background: linear-gradient(45deg, #f7fafc, #edf2f7);
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.7);
+            position: relative;
+            overflow: hidden;
         }
 
         .upload-section:hover {
-            border-color: #667eea;
-            background: linear-gradient(45deg, #edf2f7, #e2e8f0);
-            transform: translateY(-2px);
+            border-color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
         }
 
         .upload-section.dragover {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.1);
+            border-color: var(--primary-color);
+            background: rgba(108, 92, 231, 0.1);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateY(-5px); }
+            50% { transform: translateY(0); }
+        }
+
+        .upload-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--dark-color);
+        }
+
+        .upload-section p {
+            color: var(--text-light);
+            margin-bottom: 25px;
+            font-size: 1.1rem;
         }
 
         .file-input {
@@ -80,35 +157,76 @@
         }
 
         .upload-btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 1.1rem;
+            padding: 18px 40px;
+            border-radius: 30px;
+            font-size: 1.2rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: var(--transition);
             margin: 10px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+            opacity: 0;
+            transition: var(--transition);
         }
 
         .upload-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(108, 92, 231, 0.4);
+        }
+
+        .upload-btn:hover::before {
+            opacity: 1;
+        }
+
+        .upload-btn i {
+            position: relative;
+            z-index: 1;
+        }
+
+        .upload-btn span {
+            position: relative;
+            z-index: 1;
         }
 
         .editor-container {
             display: none;
-            grid-template-columns: 1fr 300px;
+            grid-template-columns: 1fr 350px;
             gap: 30px;
             margin-top: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .canvas-container {
             position: relative;
-            border-radius: 15px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            background: #f8f9fa;
+            box-shadow: var(--shadow-md);
+            background: var(--light-color);
+            height: fit-content;
         }
 
         #imageCanvas {
@@ -116,80 +234,116 @@
             height: auto;
             display: block;
             cursor: crosshair;
+            transition: var(--transition);
         }
 
         .tools-panel {
             background: linear-gradient(145deg, #f8f9fa, #e9ecef);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
         }
 
         .tool-group {
-            margin-bottom: 25px;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .tool-group:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
         }
 
         .tool-group h3 {
-            color: #2d3748;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
+            color: var(--dark-color);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .tool-group h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 40px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 3px;
+        }
+
+        .tool-group h3 i {
+            color: var(--primary-color);
+        }
+
+        .ai-detection-hint {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 12px 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            margin: 15px 0;
+            text-align: center;
+            animation: slideIn 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .brush-size {
             width: 100%;
-            margin: 10px 0;
+            margin: 15px 0;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+            outline: none;
+            opacity: 0.7;
+            transition: var(--transition);
         }
 
-        .action-btn {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
+        .brush-size:hover {
+            opacity: 1;
+        }
+
+        .brush-size::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
             cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .action-btn.remove {
-            background: linear-gradient(45deg, #e53e3e, #c53030);
-            color: white;
-        }
-
-        .action-btn.remove:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(229, 62, 62, 0.3);
-        }
-
-        .action-btn.undo {
-            background: linear-gradient(45deg, #4299e1, #3182ce);
-            color: white;
-        }
-
-        .action-btn.undo:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(66, 153, 225, 0.3);
-        }
-
-        .action-btn.download {
-            background: linear-gradient(45deg, #38a169, #2f855a);
-            color: white;
-        }
-
-        .action-btn.download:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(56, 161, 105, 0.3);
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+            border: 3px solid white;
         }
 
         .brush-preview {
-            width: 80px;
-            height: 80px;
-            border: 3px solid #e2e8f0;
-            border-radius: 15px;
-            margin: 15px auto;
+            width: 100px;
+            height: 100px;
+            border: 3px solid var(--secondary-color);
+            border-radius: 20px;
+            margin: 20px auto;
             position: relative;
             background: linear-gradient(135deg, #f7fafc, #edf2f7);
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.1);
             overflow: hidden;
         }
 
@@ -199,11 +353,11 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
             border-radius: 50%;
             width: var(--brush-size, 20px);
             height: var(--brush-size, 20px);
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
             animation: pulse 2s infinite;
         }
 
@@ -213,37 +367,109 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            border: 2px dashed #667eea;
+            border: 2px dashed var(--primary-color);
             border-radius: 50%;
-            width: calc(var(--brush-size, 20px) + 10px);
-            height: calc(var(--brush-size, 20px) + 10px);
+            width: calc(var(--brush-size, 20px) + 15px);
+            height: calc(var(--brush-size, 20px) + 15px);
             animation: rotate 3s linear infinite;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.1); }
+        .action-btn {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            z-index: 1;
         }
 
-        @keyframes rotate {
-            from { transform: translate(-50%, -50%) rotate(0deg); }
-            to { transform: translate(-50%, -50%) rotate(360deg); }
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+            z-index: -1;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .action-btn:hover::before {
+            opacity: 1;
+        }
+
+        .action-btn i {
+            font-size: 1.2rem;
+        }
+
+        .action-btn.remove {
+            background: linear-gradient(45deg, var(--danger-color), #ff7675);
+            color: white;
+        }
+
+        .action-btn.remove:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(214, 48, 49, 0.3);
+        }
+
+        .action-btn.undo {
+            background: linear-gradient(45deg, #0984e3, #74b9ff);
+            color: white;
+        }
+
+        .action-btn.undo:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(9, 132, 227, 0.3);
+        }
+
+        .action-btn.download {
+            background: linear-gradient(45deg, var(--success-color), #55efc4);
+            color: white;
+        }
+
+        .action-btn.download:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 184, 148, 0.3);
+        }
+
+        .action-btn.ai-detect {
+            background: linear-gradient(45deg, #fdcb6e, #ffeaa7);
+            color: var(--dark-color);
+        }
+
+        .action-btn.ai-detect:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(253, 203, 110, 0.3);
         }
 
         .smart-brush-cursor {
             position: absolute;
             pointer-events: none;
             z-index: 1000;
-            border: 3px solid #667eea;
+            border: 3px solid var(--primary-color);
             border-radius: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 0 2px white, 0 0 20px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 0 0 3px white, 0 0 25px rgba(108, 92, 231, 0.6);
             animation: cursorPulse 1.5s infinite;
+            mix-blend-mode: multiply;
         }
 
         @keyframes cursorPulse {
             0%, 100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
         }
 
         .selection-overlay {
@@ -254,38 +480,210 @@
             mix-blend-mode: multiply;
         }
 
-        .ai-detection-hint {
-            background: linear-gradient(45deg, #38a169, #2f855a);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            margin: 10px 0;
-            text-align: center;
-            animation: slideIn 0.5s ease;
-        }
-
         .creator-credit {
             text-align: center;
-            margin-top: 30px;
-            color: #4a5568;
-            font-size: 0.9rem;
+            margin-top: 40px;
+            color: var(--text-light);
+            font-size: 1rem;
             padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .creator-credit a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
         }
 
-        @media (max-width: 768px) {
+        .creator-credit a:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            color: white;
+            font-size: 1.5rem;
+            gap: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .loading-spinner {
+            width: 70px;
+            height: 70px;
+            border: 8px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            width: 300px;
+            height: 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0;
+            transition: var(--transition);
+            transform: translateY(10px);
+        }
+
+        .tooltip.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--secondary-color);
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .checkbox-container input[type="checkbox"]:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .checkbox-container input[type="checkbox"]:checked::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            color: white;
+            font-size: 12px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .checkbox-container label {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: none;
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .zoom-btn:hover {
+            transform: scale(1.1);
+            background: var(--primary-color);
+            color: white;
+        }
+
+        @media (max-width: 992px) {
             .editor-container {
                 grid-template-columns: 1fr;
             }
             
             .header h1 {
-                font-size: 2rem;
+                font-size: 2.2rem;
+            }
+            
+            .upload-section {
+                padding: 40px 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .upload-btn {
+                padding: 15px 30px;
+                font-size: 1rem;
+            }
+            
+            .tools-panel {
+                padding: 20px;
             }
         }
     </style>
@@ -294,15 +692,16 @@
     <div class="container">
         <div class="header">
             <h1>سڕینەوەی زیرەکی شت لە وێنە</h1>
-            <p>وێنەکەت هەڵبژێرە و شتەکانی ناخوازراوت لێ بسڕەوە بە شێوەیەکی زیرەک</p>
+            <p>وێنەکەت هەڵبژێرە و شتەکانی ناخوازراوت لێ بسڕەوە بە شێوەیەکی زیرەک بەهۆی تەکنەلۆژیای AI</p>
         </div>
 
         <div class="upload-section" id="uploadSection">
             <div>
-                <h2>وێنەکەت بخەرە ئێرە</h2>
-                <p>یان کلیک بکە بۆ هەڵبژاردن</p>
+                <h2><i class="fas fa-cloud-upload-alt"></i> وێنەکەت بخەرە ئێرە</h2>
+                <p>یان کلیک بکە بۆ هەڵبژاردنی فایل</p>
                 <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                    هەڵبژاردنی وێنە
+                    <i class="fas fa-image"></i>
+                    <span>هەڵبژاردنی وێنە</span>
                 </button>
                 <input type="file" id="fileInput" class="file-input" accept="image/*">
             </div>
@@ -311,60 +710,88 @@
         <div class="editor-container" id="editorContainer">
             <div class="canvas-container">
                 <canvas id="imageCanvas"></canvas>
+                <div class="zoom-controls">
+                    <button class="zoom-btn" id="zoomInBtn"><i class="fas fa-search-plus"></i></button>
+                    <button class="zoom-btn" id="zoomOutBtn"><i class="fas fa-search-minus"></i></button>
+                    <button class="zoom-btn" id="resetZoomBtn"><i class="fas fa-expand"></i></button>
+                </div>
             </div>
             
             <div class="tools-panel">
                 <div class="tool-group">
-                    <h3>فرچەی زیرەک</h3>
+                    <h3><i class="fas fa-magic"></i> فرچەی زیرەک</h3>
                     <div class="ai-detection-hint">
-                        🎯 فرچەی زیرەک - خۆکارانە لێوارەکان دەناسێتەوە
+                        <i class="fas fa-robot"></i>
+                        <span>فرچەی زیرەک - خۆکارانە لێوارەکان دەناسێتەوە</span>
                     </div>
                     <label for="brushSize">قەبارەی فرچە: <span id="brushSizeValue">20</span>px</label>
-                    <input type="range" id="brushSize" class="brush-size" min="10" max="80" value="20">
+                    <input type="range" id="brushSize" class="brush-size" min="5" max="100" value="20">
                     <div class="brush-preview" id="brushPreview"></div>
                     
-                    <div style="margin-top: 15px;">
-                        <label>
-                            <input type="checkbox" id="smartMode" checked> 
-                            دۆخی زیرەک - خۆکارانە لێوارەکان بدۆزێتەوە
-                        </label>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="smartMode" checked>
+                        <label for="smartMode">دۆخی زیرەک - خۆکارانە لێوارەکان بدۆزێتەوە</label>
+                    </div>
+                    
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="edgeDetection" checked>
+                        <label for="edgeDetection">ناسینەوەی لێوار</label>
                     </div>
                 </div>
 
                 <div class="tool-group">
-                    <h3>کارەکان</h3>
+                    <h3><i class="fas fa-sliders-h"></i> کارەکان</h3>
                     <button class="action-btn remove" id="removeBtn">
-                        سڕینەوەی ناوچەکان
+                        <i class="fas fa-eraser"></i>
+                        <span>سڕینەوەی ناوچەکان</span>
                     </button>
                     <button class="action-btn undo" id="undoBtn">
-                        گەڕاندنەوە
+                        <i class="fas fa-undo"></i>
+                        <span>گەڕاندنەوە</span>
+                    </button>
+                    <button class="action-btn ai-detect" id="aiDetectBtn">
+                        <i class="fas fa-robot"></i>
+                        <span>ناسینەوەی خۆکار (AI)</span>
                     </button>
                     <button class="action-btn download" id="downloadBtn">
-                        دابەزاندنی وێنە
+                        <i class="fas fa-download"></i>
+                        <span>دابەزاندنی وێنە</span>
                     </button>
                 </div>
 
                 <div class="tool-group">
-                    <h3>ڕێنمایی</h3>
-                    <p style="font-size: 0.9rem; color: #666;">
-                        ١. فرچەکە بەکار بهێنە بۆ نیشانکردنی ئەو شتانەی دەتەوێت بیانسڕیتەوە
-                        <br><br>
-                        ٢. دوگمەی "سڕینەوەی ناوچەکان" کلیک بکە
-                        <br><br>
-                        ٣. وێنەکە دابەزێنە
-                    </p>
+                    <h3><i class="fas fa-question-circle"></i> ڕێنمایی</h3>
+                    <div style="font-size: 0.95rem; color: var(--text-light); line-height: 1.8;">
+                        <p><i class="fas fa-circle" style="font-size: 0.5rem; vertical-align: middle; color: var(--primary-color);"></i> فرچەکە بەکار بهێنە بۆ نیشانکردنی ئەو شتانەی دەتەوێت بیانسڕیتەوە</p>
+                        <p><i class="fas fa-circle" style="font-size: 0.5rem; vertical-align: middle; color: var(--primary-color);"></i> دوگمەی "سڕینەوەی ناوچەکان" کلیک بکە</p>
+                        <p><i class="fas fa-circle" style="font-size: 0.5rem; vertical-align: middle; color: var(--primary-color);"></i> وێنەکە دابەزێنە</p>
+                        <p style="margin-top: 15px;"><i class="fas fa-lightbulb" style="color: var(--warning-color);"></i> ئامرازی ناسینەوەی خۆکار (AI) دەتوانێت شتەکان بە شێوەیەکی خۆکار بەدیبکات و بسڕێتەوە</p>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="creator-credit">
-            Created by Ibrahim Mala Taha
+            <i class="fas fa-code"></i>
+            <span>Created by</span>
+            <a href="#" target="_blank">Ibrahim Mala Taha</a>
         </div>
     </div>
 
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div id="loadingText">پردەکە لە کاردایە... تکایە چاوەڕوان بە</div>
+        <div class="progress-bar">
+            <div class="progress" id="progressBar"></div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
     <script>
+        // Main elements
         const canvas = document.getElementById('imageCanvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
         const fileInput = document.getElementById('fileInput');
         const uploadSection = document.getElementById('uploadSection');
         const editorContainer = document.getElementById('editorContainer');
@@ -372,97 +799,128 @@
         const brushSizeValue = document.getElementById('brushSizeValue');
         const brushPreview = document.getElementById('brushPreview');
         const smartModeCheckbox = document.getElementById('smartMode');
+        const edgeDetectionCheckbox = document.getElementById('edgeDetection');
         const removeBtn = document.getElementById('removeBtn');
         const undoBtn = document.getElementById('undoBtn');
         const downloadBtn = document.getElementById('downloadBtn');
+        const aiDetectBtn = document.getElementById('aiDetectBtn');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
+        const progressBar = document.getElementById('progressBar');
+        const tooltip = document.getElementById('tooltip');
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+        const resetZoomBtn = document.getElementById('resetZoomBtn');
 
+        // State variables
         let originalImage = null;
         let maskCanvas = null;
         let maskCtx = null;
         let isDrawing = false;
         let brushSize = 20;
         let smartMode = true;
+        let edgeDetection = true;
         let imageHistory = [];
         let customCursor = null;
         let lastDrawPoint = null;
+        let zoomLevel = 1;
+        let bodyPixModel = null;
+        let isAIProcessing = false;
 
         // Initialize
         updateBrushPreview();
+        setupEventListeners();
 
-        // File input handler
-        fileInput.addEventListener('change', handleFileSelect);
+        function setupEventListeners() {
+            // File input handler
+            fileInput.addEventListener('change', handleFileSelect);
 
-        // Drag and drop
-        uploadSection.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadSection.classList.add('dragover');
-        });
-
-        uploadSection.addEventListener('dragleave', () => {
-            uploadSection.classList.remove('dragover');
-        });
-
-        uploadSection.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadSection.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFile(files[0]);
-            }
-        });
-
-        // Brush size slider
-        brushSizeSlider.addEventListener('input', (e) => {
-            brushSize = parseInt(e.target.value);
-            brushSizeValue.textContent = brushSize;
-            updateBrushPreview();
-            updateCustomCursor();
-        });
-
-        // Smart mode toggle
-        smartModeCheckbox.addEventListener('change', (e) => {
-            smartMode = e.target.checked;
-        });
-
-        // Canvas drawing with smart features
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', handleMouseMove);
-        canvas.addEventListener('mouseup', stopDrawing);
-        canvas.addEventListener('mouseout', stopDrawing);
-        canvas.addEventListener('mouseenter', showCustomCursor);
-        canvas.addEventListener('mouseleave', hideCustomCursor);
-
-        // Touch events for mobile
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent('mousedown', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
+            // Drag and drop
+            uploadSection.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadSection.classList.add('dragover');
             });
-            canvas.dispatchEvent(mouseEvent);
-        });
 
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent('mousemove', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
+            uploadSection.addEventListener('dragleave', () => {
+                uploadSection.classList.remove('dragover');
             });
-            canvas.dispatchEvent(mouseEvent);
-        });
 
-        canvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            const mouseEvent = new MouseEvent('mouseup', {});
-            canvas.dispatchEvent(mouseEvent);
-        });
+            uploadSection.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadSection.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                }
+            });
 
-        // Action buttons
-        removeBtn.addEventListener('click', removeSelectedAreas);
-        undoBtn.addEventListener('click', undo);
-        downloadBtn.addEventListener('click', downloadImage);
+            // Brush size slider
+            brushSizeSlider.addEventListener('input', (e) => {
+                brushSize = parseInt(e.target.value);
+                brushSizeValue.textContent = brushSize;
+                updateBrushPreview();
+                updateCustomCursor();
+            });
+
+            // Smart mode toggle
+            smartModeCheckbox.addEventListener('change', (e) => {
+                smartMode = e.target.checked;
+            });
+
+            // Edge detection toggle
+            edgeDetectionCheckbox.addEventListener('change', (e) => {
+                edgeDetection = e.target.checked;
+            });
+
+            // Canvas drawing with smart features
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            canvas.addEventListener('mouseenter', showCustomCursor);
+            canvas.addEventListener('mouseleave', hideCustomCursor);
+
+            // Touch events for mobile
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousedown', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            });
+
+            canvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                const mouseEvent = new MouseEvent('mouseup', {});
+                canvas.dispatchEvent(mouseEvent);
+            });
+
+            // Action buttons
+            removeBtn.addEventListener('click', removeSelectedAreas);
+            undoBtn.addEventListener('click', undo);
+            downloadBtn.addEventListener('click', downloadImage);
+            aiDetectBtn.addEventListener('click', detectObjectsWithAI);
+
+            // Zoom controls
+            zoomInBtn.addEventListener('click', () => adjustZoom(1.2));
+            zoomOutBtn.addEventListener('click', () => adjustZoom(0.8));
+            resetZoomBtn.addEventListener('click', () => resetZoom());
+
+            // Tooltip for canvas
+            canvas.addEventListener('mousemove', updateTooltipPosition);
+        }
 
         function handleFileSelect(e) {
             const file = e.target.files[0];
@@ -471,43 +929,76 @@
             }
         }
 
-        function handleFile(file) {
+        async function handleFile(file) {
             if (!file.type.startsWith('image/')) {
-                alert('تکایە فایلی وێنە هەڵبژێرە');
+                showTooltip('تکایە فایلی وێنە هەڵبژێرە', 'error');
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    originalImage = img;
-                    setupCanvas(img);
-                    uploadSection.style.display = 'none';
-                    editorContainer.style.display = 'grid';
-                    saveToHistory();
+            showLoading('پەرداخکردنی وێنە...');
+
+            try {
+                const img = await loadImage(file);
+                originalImage = img;
+                setupCanvas(img);
+                uploadSection.style.display = 'none';
+                editorContainer.style.display = 'grid';
+                saveToHistory();
+                
+                // Preload AI model in background
+                setTimeout(loadAIModel, 1000);
+            } catch (error) {
+                showTooltip('هەڵە لە خوێندنەوەی وێنە', 'error');
+                console.error('Error loading image:', error);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function loadImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = reject;
+                    img.src = e.target.result;
                 };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
         }
 
         function setupCanvas(img) {
             // Set canvas size to match image
-            canvas.width = img.width;
-            canvas.height = img.height;
+            const maxWidth = window.innerWidth * 0.7;
+            const maxHeight = window.innerHeight * 0.7;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth || height > maxHeight) {
+                const ratio = Math.min(maxWidth / width, maxHeight / height);
+                width *= ratio;
+                height *= ratio;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
             
             // Draw image on main canvas
-            ctx.drawImage(img, 0, 0);
+            ctx.drawImage(img, 0, 0, width, height);
             
             // Create mask canvas
             maskCanvas = document.createElement('canvas');
-            maskCanvas.width = img.width;
-            maskCanvas.height = img.height;
+            maskCanvas.width = width;
+            maskCanvas.height = height;
             maskCtx = maskCanvas.getContext('2d');
             
             // Create custom cursor
             createCustomCursor();
+            
+            // Reset zoom
+            resetZoom();
         }
 
         function updateBrushPreview() {
@@ -557,6 +1048,22 @@
             if (isDrawing) {
                 draw(e);
             }
+        }
+
+        function updateTooltipPosition(e) {
+            const rect = canvas.getBoundingClientRect();
+            tooltip.style.left = (e.clientX - rect.left + 15) + 'px';
+            tooltip.style.top = (e.clientY - rect.top + 15) + 'px';
+        }
+
+        function showTooltip(message, type = 'info') {
+            tooltip.textContent = message;
+            tooltip.style.backgroundColor = type === 'error' ? 'rgba(214, 48, 49, 0.9)' : 'rgba(0,0,0,0.9)';
+            tooltip.classList.add('active');
+            
+            setTimeout(() => {
+                tooltip.classList.remove('active');
+            }, 3000);
         }
 
         function getMousePos(e) {
@@ -617,11 +1124,11 @@
 
             // Draw mask overlay on main canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(originalImage, 0, 0);
+            ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
             
             // Apply glowing mask effect
             ctx.globalCompositeOperation = 'source-over';
-            ctx.shadowColor = 'rgba(102, 126, 234, 0.8)';
+            ctx.shadowColor = 'rgba(108, 92, 231, 0.8)';
             ctx.shadowBlur = 10;
             ctx.drawImage(maskCanvas, 0, 0);
             ctx.shadowBlur = 0;
@@ -656,7 +1163,7 @@
             maskCtx.globalCompositeOperation = 'source-over';
             
             // Adaptive brush size based on edge detection
-            const adaptiveBrushSize = detectEdges(x, y) ? brushSize * 0.7 : brushSize;
+            const adaptiveBrushSize = edgeDetection && detectEdges(x, y) ? brushSize * 0.7 : brushSize;
             
             const gradient = maskCtx.createRadialGradient(x, y, 0, x, y, adaptiveBrushSize / 2);
             gradient.addColorStop(0, 'rgba(255, 120, 120, 0.9)');
@@ -708,34 +1215,49 @@
         function removeSelectedAreas() {
             if (!maskCanvas) return;
 
-            saveToHistory();
+            showLoading('سڕینەوەی ناوچە دیاریکراوەکان...');
 
-            // Advanced inpainting with better results
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const maskData = maskCtx.getImageData(0, 0, canvas.width, canvas.height);
+            // Use setTimeout to allow UI to update before heavy processing
+            setTimeout(() => {
+                try {
+                    saveToHistory();
 
-            // Multi-pass inpainting for better quality
-            for (let pass = 0; pass < 3; pass++) {
-                for (let i = 0; i < maskData.data.length; i += 4) {
-                    const alpha = maskData.data[i + 3];
-                    if (alpha > 50) { // Threshold for mask detection
-                        const x = (i / 4) % canvas.width;
-                        const y = Math.floor(i / 4 / canvas.width);
-                        
-                        const avgColor = getSmartAverageColor(imageData, x, y, maskData, pass);
-                        
-                        imageData.data[i] = avgColor.r;
-                        imageData.data[i + 1] = avgColor.g;
-                        imageData.data[i + 2] = avgColor.b;
+                    // Advanced inpainting with better results
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const maskData = maskCtx.getImageData(0, 0, canvas.width, canvas.height);
+
+                    // Multi-pass inpainting for better quality
+                    for (let pass = 0; pass < 3; pass++) {
+                        updateProgress((pass + 1) / 3 * 80);
+                        for (let i = 0; i < maskData.data.length; i += 4) {
+                            const alpha = maskData.data[i + 3];
+                            if (alpha > 50) { // Threshold for mask detection
+                                const x = (i / 4) % canvas.width;
+                                const y = Math.floor(i / 4 / canvas.width);
+                                
+                                const avgColor = getSmartAverageColor(imageData, x, y, maskData, pass);
+                                
+                                imageData.data[i] = avgColor.r;
+                                imageData.data[i + 1] = avgColor.g;
+                                imageData.data[i + 2] = avgColor.b;
+                            }
+                        }
                     }
+
+                    // Apply the modified image data
+                    ctx.putImageData(imageData, 0, 0);
+
+                    // Clear mask
+                    maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+                    
+                    showTooltip('ناوچە دیاریکراوەکان سڕایەوە!');
+                } catch (error) {
+                    console.error('Error removing areas:', error);
+                    showTooltip('هەڵە لە سڕینەوەی ناوچەکان', 'error');
+                } finally {
+                    hideLoading();
                 }
-            }
-
-            // Apply the modified image data
-            ctx.putImageData(imageData, 0, 0);
-
-            // Clear mask
-            maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+            }, 100);
         }
 
         function getSmartAverageColor(imageData, x, y, maskData, pass) {
@@ -794,14 +1316,137 @@
                 if (maskCtx) {
                     maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
                 }
+                
+                showTooltip('کارەکە گەڕێندرایەوە');
+            } else {
+                showTooltip('هیچ کارێک نییە بۆ گەڕاندنەوە', 'error');
             }
         }
 
         function downloadImage() {
             const link = document.createElement('a');
-            link.download = 'edited-image.png';
-            link.href = canvas.toDataURL();
+            link.download = 'edited-image-' + Date.now() + '.png';
+            link.href = canvas.toDataURL('image/png', 1.0);
             link.click();
+            showTooltip('وێنەکە دابەزێنرا!');
+        }
+
+        async function loadAIModel() {
+            if (bodyPixModel) return;
+            
+            try {
+                showLoading('بارکردنی مۆدێلی AI...');
+                bodyPixModel = await bodyPix.load();
+                showTooltip('مۆدێلی AI ئامادەیە! دەتوانیت شتەکان بە شێوەیەکی خۆکار بسڕیتەوە');
+            } catch (error) {
+                console.error('Error loading AI model:', error);
+                showTooltip('هەڵە لە بارکردنی مۆدێلی AI', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function detectObjectsWithAI() {
+            if (!originalImage || isAIProcessing) return;
+            
+            if (!bodyPixModel) {
+                showTooltip('تکایە چاوەڕوان بە تا مۆدێل باربکرێت', 'error');
+                await loadAIModel();
+                if (!bodyPixModel) return;
+            }
+            
+            isAIProcessing = true;
+            showLoading('ناسینەوەی شتەکان بە شێوەیەکی خۆکار...');
+            
+            try {
+                // Create a temporary canvas for AI processing
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = originalImage.width;
+                tempCanvas.height = originalImage.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.drawImage(originalImage, 0, 0);
+                
+                // Run segmentation
+                updateProgress(30);
+                const segmentation = await bodyPixModel.segmentPerson(tempCanvas, {
+                    flipHorizontal: false,
+                    internalResolution: 'high',
+                    segmentationThreshold: 0.7
+                });
+                
+                updateProgress(70);
+                
+                // Create mask from segmentation
+                const mask = segmentation.data;
+                maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+                
+                // Scale mask to match our canvas size
+                const scaleX = maskCanvas.width / originalImage.width;
+                const scaleY = maskCanvas.height / originalImage.height;
+                
+                // Draw mask
+                maskCtx.fillStyle = 'rgba(255, 100, 100, 0.7)';
+                for (let y = 0; y < originalImage.height; y++) {
+                    for (let x = 0; x < originalImage.width; x++) {
+                        const idx = y * originalImage.width + x;
+                        if (mask[idx] === 1) { // Person detected
+                            const scaledX = Math.floor(x * scaleX);
+                            const scaledY = Math.floor(y * scaleY);
+                            maskCtx.fillRect(scaledX, scaledY, 1, 1);
+                        }
+                    }
+                }
+                
+                // Update display
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.shadowColor = 'rgba(108, 92, 231, 0.8)';
+                ctx.shadowBlur = 10;
+                ctx.drawImage(maskCanvas, 0, 0);
+                ctx.shadowBlur = 0;
+                ctx.globalCompositeOperation = 'source-over';
+                
+                updateProgress(100);
+                showTooltip('شتەکان بە شێوەیەکی خۆکار ناسێنران! کلیک بکە بۆ سڕینەوەیان');
+            } catch (error) {
+                console.error('AI detection error:', error);
+                showTooltip('هەڵە لە ناسینەوەی خۆکار', 'error');
+            } finally {
+                isAIProcessing = false;
+                hideLoading();
+            }
+        }
+
+        function adjustZoom(factor) {
+            zoomLevel *= factor;
+            zoomLevel = Math.max(0.1, Math.min(zoomLevel, 10));
+            
+            const container = canvas.parentElement;
+            container.style.transform = `scale(${zoomLevel})`;
+            container.style.transformOrigin = 'center';
+            
+            showTooltip(`زۆوم: ${Math.round(zoomLevel * 100)}%`);
+        }
+
+        function resetZoom() {
+            zoomLevel = 1;
+            const container = canvas.parentElement;
+            container.style.transform = 'scale(1)';
+        }
+
+        function showLoading(message) {
+            loadingText.textContent = message;
+            progressBar.style.width = '0%';
+            loadingOverlay.classList.add('active');
+        }
+
+        function hideLoading() {
+            loadingOverlay.classList.remove('active');
+        }
+
+        function updateProgress(percent) {
+            progressBar.style.width = `${percent}%`;
         }
     </script>
 </body>
