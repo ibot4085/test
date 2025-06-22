@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سڕینەوەی زیرەکی شت لە وێنە</title>
     <style>
-        /* Modern color scheme */
+        /* Modern Color Palette */
         :root {
             --primary: #4361ee;
             --primary-dark: #3a56d4;
+            --primary-light: #4895ef;
             --secondary: #3f37c9;
-            --accent: #4895ef;
+            --accent: #4cc9f0;
             --danger: #f72585;
             --success: #4cc9f0;
             --warning: #f8961e;
@@ -18,9 +19,11 @@
             --dark: #212529;
             --gray: #6c757d;
             --light-gray: #e9ecef;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
-        /* Base styles */
+        /* Base Styles */
         * {
             margin: 0;
             padding: 0;
@@ -35,90 +38,236 @@
             direction: rtl;
             color: var(--dark);
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
+        /* Container with Glass Morphism Effect */
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 1.5rem;
-            padding: 2.5rem;
-            box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(1rem);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 2rem;
+            padding: 3rem;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             position: relative;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: fadeIn 0.8s ease-out;
         }
 
-        /* Header styles */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            z-index: -1;
+            animation: rotate 20s linear infinite;
+        }
+
+        /* Header Styles */
         .header {
             text-align: center;
-            margin-bottom: 2.5rem;
+            margin-bottom: 3rem;
             position: relative;
             z-index: 1;
+            animation: slideDown 0.8s ease-out;
         }
 
         .header h1 {
             color: transparent;
-            font-size: 2.8rem;
-            margin-bottom: 1rem;
+            font-size: 3.2rem;
+            margin-bottom: 1.5rem;
             background: linear-gradient(45deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             background-clip: text;
-            font-weight: 700;
+            font-weight: 800;
             letter-spacing: -0.05rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            display: inline-block;
+        }
+
+        .header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            right: 0;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 2px;
+            margin: 0 auto;
         }
 
         .header p {
             color: var(--dark);
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             max-width: 700px;
             margin: 0 auto;
             line-height: 1.8;
             opacity: 0.9;
         }
 
-        /* Upload section */
+        /* Upload Section */
         .upload-section {
-            border: 0.1875rem dashed rgba(67, 97, 238, 0.3);
-            border-radius: 1.25rem;
-            padding: 3rem 2rem;
+            border: 3px dashed rgba(67, 97, 238, 0.3);
+            border-radius: 1.5rem;
+            padding: 4rem 2rem;
             text-align: center;
-            margin-bottom: 2.5rem;
-            transition: all 0.3s ease;
+            margin-bottom: 3rem;
+            transition: var(--transition);
             background: rgba(255, 255, 255, 0.7);
             position: relative;
             overflow: hidden;
-            backdrop-filter: blur(0.3125rem);
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 1s ease-out;
         }
 
         .upload-section:hover {
             border-color: var(--primary);
             background: rgba(255, 255, 255, 0.85);
-            transform: translateY(-0.1875rem);
-            box-shadow: 0 0.625rem 1.5625rem rgba(26, 41, 128, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(26, 41, 128, 0.15);
         }
 
-        /* Editor layout */
+        .upload-section.dragover {
+            border-color: var(--primary);
+            background: rgba(67, 97, 238, 0.05);
+            animation: pulse 1.5s infinite;
+        }
+
+        .upload-section h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .upload-section p {
+            color: var(--dark);
+            opacity: 0.8;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            z-index: 1;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255,255,255,0.2), rgba(255,255,255,0));
+            opacity: 0;
+            transition: var(--transition);
+            z-index: -1;
+        }
+
+        .btn:hover::before {
+            opacity: 1;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary), var(--primary-light));
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, var(--accent), var(--success));
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, var(--danger), #b5179e);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, var(--warning), #f3722c);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, var(--success), #4895ef);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-icon {
+            margin-left: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        /* Editor Layout */
         .editor-container {
             display: none;
-            grid-template-columns: 1fr 350px;
-            gap: 2rem;
+            grid-template-columns: 1fr 400px;
+            gap: 2.5rem;
             margin-top: 2rem;
+            animation: fadeIn 1s ease-out;
         }
 
-        /* Canvas container */
+        /* Canvas Container */
         .canvas-container {
             position: relative;
-            border-radius: 1rem;
+            border-radius: 1.5rem;
             overflow: hidden;
-            box-shadow: 0 0.625rem 1.875rem rgba(0, 0, 0, 0.15);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
             background: var(--light);
             border: 1px solid rgba(0, 0, 0, 0.05);
-            min-height: 500px;
+            min-height: 600px;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: var(--transition);
+        }
+
+        .canvas-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
         }
 
         #imageCanvas {
@@ -126,7 +275,7 @@
             max-height: 80vh;
             display: block;
             cursor: crosshair;
-            transition: transform 0.3s ease;
+            transition: var(--transition);
             background-color: #f5f5f5;
             background-image: 
                 linear-gradient(45deg, #e0e0e0 25%, transparent 25%),
@@ -137,70 +286,198 @@
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
 
-        /* Tools panel */
+        /* Tools Panel */
         .tools-panel {
             background: linear-gradient(145deg, #f8f9fa, #e9ecef);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            box-shadow: 0 0.3125rem 0.9375rem rgba(0, 0, 0, 0.1);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
-            gap: 1.25rem;
+            gap: 1.5rem;
             height: fit-content;
             position: sticky;
-            top: 1rem;
+            top: 2rem;
+            animation: slideInRight 1s ease-out;
         }
 
-        /* Tool groups */
+        /* Tool Groups */
         .tool-group {
-            margin-bottom: 1rem;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 1.25rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
             border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
         }
 
-        /* Buttons */
-        .btn {
-            display: inline-flex;
+        .tool-group:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .tool-group h3 {
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 0.875rem 1.5rem;
-            border-radius: 3.125rem;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
+            gap: 0.8rem;
             position: relative;
+            padding-bottom: 0.8rem;
+        }
+
+        .tool-group h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 3px;
+        }
+
+        .tool-group h3 i {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+            color: var(--dark);
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--light-gray);
+            background: white;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        /* Range Slider */
+        .range-slider {
+            width: 100%;
+            margin: 1rem 0;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--light-gray);
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .range-slider:hover {
+            background: #d1d5db;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+            border: 3px solid white;
+        }
+
+        .range-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .value-display {
+            font-size: 0.95rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        /* Brush Preview */
+        .brush-preview {
+            width: 120px;
+            height: 120px;
+            border: 3px solid var(--light-gray);
+            border-radius: 1rem;
+            margin: 1.5rem auto;
+            position: relative;
+            background: linear-gradient(135deg, #f7fafc, #edf2f7);
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.1);
             overflow: hidden;
-            box-shadow: 0 0.25rem 0.375rem rgba(0, 0, 0, 0.1);
+            animation: pulse 2s infinite;
         }
 
-        .btn-primary {
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            color: white;
+        .brush-preview::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            border-radius: 50%;
+            width: var(--brush-size, 30px);
+            height: var(--brush-size, 30px);
+            box-shadow: 0 3px 10px rgba(67, 97, 238, 0.4);
         }
 
-        .btn-danger {
-            background: linear-gradient(45deg, var(--danger), #b5179e);
-            color: white;
+        /* Action Buttons */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
         }
 
-        .btn-success {
-            background: linear-gradient(45deg, var(--success), #4895ef);
-            color: white;
+        .action-buttons .btn {
+            width: 100%;
+            padding: 0.8rem;
+            font-size: 0.95rem;
         }
 
-        /* Progress bar */
+        /* Smart Cursor */
+        .smart-cursor {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1000;
+            border: 3px solid var(--primary);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 0 2px white, 0 0 20px rgba(67, 97, 238, 0.5);
+            mix-blend-mode: multiply;
+            display: none;
+            transition: transform 0.1s ease;
+        }
+
+        /* Progress Bar */
         .progress-container {
             width: 100%;
-            height: 0.375rem;
-            background: #e2e8f0;
-            border-radius: 0.1875rem;
-            margin-top: 1rem;
+            height: 8px;
+            background: var(--light-gray);
+            border-radius: 4px;
+            margin-top: 1.5rem;
             overflow: hidden;
             display: none;
         }
@@ -211,20 +488,157 @@
             width: 0%;
             transition: width 0.3s ease;
             position: relative;
+            overflow: hidden;
         }
 
-        /* Status messages */
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: progressShine 1.5s infinite;
+        }
+
+        /* Status Messages */
         .status-message {
             text-align: center;
-            padding: 0.75rem;
+            padding: 1rem;
             border-radius: 0.5rem;
-            margin: 0.5rem 0;
-            font-size: 0.9rem;
+            margin: 1rem 0;
+            font-size: 0.95rem;
             display: none;
+            animation: fadeIn 0.5s ease;
         }
 
-        /* Responsive design */
-        @media (max-width: 992px) {
+        .status-info {
+            background-color: rgba(72, 149, 239, 0.1);
+            color: var(--primary-light);
+            border: 1px solid rgba(72, 149, 239, 0.2);
+        }
+
+        .status-success {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(76, 201, 240, 0.2);
+        }
+
+        .status-warning {
+            background-color: rgba(248, 150, 30, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(248, 150, 30, 0.2);
+        }
+
+        .status-error {
+            background-color: rgba(247, 37, 133, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(247, 37, 133, 0.2);
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background-color: var(--dark);
+            color: #fff;
+            text-align: center;
+            border-radius: 0.5rem;
+            padding: 0.8rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85rem;
+            font-weight: normal;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .tooltip .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--dark) transparent transparent transparent;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Advanced Options */
+        .advanced-options {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            margin-top: 0;
+        }
+
+        .advanced-options.active {
+            max-height: 500px;
+            margin-top: 1.5rem;
+        }
+
+        .toggle-advanced {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            color: var(--primary);
+            font-size: 0.95rem;
+            margin-top: 1rem;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .toggle-advanced:hover {
+            background: rgba(67, 97, 238, 0.1);
+        }
+
+        .toggle-advanced i {
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-advanced.active i {
+            transform: rotate(180deg);
+        }
+
+        /* Creator Credit */
+        .creator-credit {
+            text-align: center;
+            margin-top: 3rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeIn 1s ease-out;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .container {
+                padding: 2rem;
+            }
+            
             .editor-container {
                 grid-template-columns: 1fr;
             }
@@ -237,11 +651,131 @@
         @media (max-width: 768px) {
             .container {
                 padding: 1.5rem;
+                border-radius: 1.2rem;
+            }
+            
+            .header h1 {
+                font-size: 2.4rem;
+            }
+            
+            .upload-section {
+                padding: 3rem 1.5rem;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .container {
+                padding: 1.2rem;
+                border-radius: 1rem;
             }
             
             .header h1 {
                 font-size: 2rem;
             }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .upload-section {
+                padding: 2rem 1rem;
+            }
+            
+            .tool-group {
+                padding: 1.2rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from { 
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from { 
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes progressShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(67, 97, 238, 0.5);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
         }
     </style>
     <!-- Font Awesome -->
@@ -250,16 +784,16 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>سڕینەوەی زیرەکی شت لە وێنە</h1>
+            <h1><i class="fas fa-magic"></i> سڕینەوەی زیرەکی شت لە وێنە</h1>
             <p>وێنەکەت هەڵبژێرە و شتەکانی ناخوازراوت لێ بسڕەوە بە شێوەیەکی زیرەک و سروشتی</p>
         </div>
 
         <div class="upload-section" id="uploadSection">
             <div>
-                <h2>وێنەکەت بخەرە ئێرە</h2>
+                <h2><i class="fas fa-cloud-upload-alt"></i> وێنەکەت بخەرە ئێرە</h2>
                 <p>یان کلیک بکە بۆ هەڵبژاردنی فایل</p>
-                <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-                    <i class="fas fa-cloud-upload-alt"></i> هەڵبژاردنی وێنە
+                <button class="btn btn-primary btn-lg" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-folder-open btn-icon"></i> هەڵبژاردنی وێنە
                 </button>
                 <input type="file" id="fileInput" class="file-input" accept="image/*">
             </div>
@@ -278,45 +812,73 @@
                 <div class="tool-group">
                     <h3><i class="fas fa-sliders-h"></i> ڕێکخستنەکان</h3>
                     
-                    <label for="removalQuality">کوالێتی سڕینەوە:</label>
-                    <select id="removalQuality" class="btn btn-sm" style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;">
-                        <option value="fast">خێرا (کوالێتی نزم)</option>
-                        <option value="balanced" selected>هاوسەنگ (پێشنیارکراو)</option>
-                        <option value="high">بەرز (کوالێتی باش)</option>
-                        <option value="best">باشترین (کوالێتی زۆر بەرز)</option>
-                    </select>
+                    <div class="form-group">
+                        <label for="removalQuality">جۆری سڕینەوە:</label>
+                        <select id="removalQuality" class="form-control">
+                            <option value="fast">خێرا (کوالێتی نزم)</option>
+                            <option value="balanced" selected>هاوسەنگ (پێشنیارکراو)</option>
+                            <option value="high">بەرز (کوالێتی باش)</option>
+                            <option value="best">باشترین (کوالێتی زۆر بەرز)</option>
+                        </select>
+                    </div>
                     
-                    <label for="blendMode">جۆری تێکەڵکردن:</label>
-                    <select id="blendMode" class="btn btn-sm" style="width: 100%; padding: 0.5rem;">
-                        <option value="natural">سروشتی (پێشنیارکراو)</option>
-                        <option value="smooth">نەرم</option>
-                        <option value="sharp">تێک</option>
-                    </select>
+                    <div class="form-group">
+                        <label for="blendMode">جۆری تێکەڵکردن:</label>
+                        <select id="blendMode" class="form-control">
+                            <option value="natural">سروشتی (پێشنیارکراو)</option>
+                            <option value="smooth">نەرم</option>
+                            <option value="sharp">تێک</option>
+                        </select>
+                    </div>
+                    
+                    <div class="toggle-advanced" id="toggleAdvanced">
+                        <span>ڕێکخستنە پێشکەوتووەکان</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    
+                    <div class="advanced-options" id="advancedOptions">
+                        <div class="form-group">
+                            <label for="brushSize">قەبارەی فرچە: <span id="brushSizeValue">30</span>px</label>
+                            <input type="range" id="brushSize" class="range-slider" min="10" max="100" value="30">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="edgeDetection">ئاستی ناسینەوەی لێوار: <span id="edgeDetectionValue">70</span>%</label>
+                            <input type="range" id="edgeDetection" class="range-slider" min="0" max="100" value="70">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="sampleRadius">شوێنی نەخشەکێشان: <span id="sampleRadiusValue">50</span>px</label>
+                            <input type="range" id="sampleRadius" class="range-slider" min="10" max="200" value="50">
+                        </div>
+                        
+                        <div class="brush-preview" id="brushPreview"></div>
+                    </div>
                 </div>
 
                 <div class="tool-group">
                     <h3><i class="fas fa-tools"></i> ئامرازەکان</h3>
                     
-                    <button class="btn btn-danger" id="removeBtn" style="width: 100%; margin-bottom: 0.75rem;">
-                        <i class="fas fa-eraser"></i> سڕینەوەی ناوچە دیاریکراوەکان
+                    <button class="btn btn-danger" id="removeBtn">
+                        <i class="fas fa-eraser btn-icon"></i> سڕینەوەی ناوچەکان
                     </button>
                     
-                    <button class="btn" id="undoBtn" style="width: 100%; margin-bottom: 0.75rem; background: var(--light-gray);">
-                        <i class="fas fa-undo"></i> گەڕاندنەوە
+                    <button class="btn btn-warning" id="undoBtn">
+                        <i class="fas fa-undo btn-icon"></i> گەڕاندنەوە
                     </button>
                     
-                    <button class="btn btn-success" id="enhanceBtn" style="width: 100%; margin-bottom: 0.75rem;">
-                        <i class="fas fa-magic"></i> باشترکردنی وێنە
+                    <button class="btn btn-success" id="enhanceBtn">
+                        <i class="fas fa-magic btn-icon"></i> باشترکردنی وێنە
                     </button>
                     
-                    <button class="btn btn-primary" id="downloadBtn" style="width: 100%;">
-                        <i class="fas fa-download"></i> دابەزاندنی وێنە
+                    <button class="btn btn-primary" id="downloadBtn">
+                        <i class="fas fa-download btn-icon"></i> دابەزاندنی وێنە
                     </button>
                 </div>
 
                 <div class="tool-group">
                     <h3><i class="fas fa-info-circle"></i> ڕێنمایی</h3>
-                    <p style="font-size: 0.9rem; color: var(--gray); line-height: 1.6;">
+                    <p style="font-size: 0.95rem; color: var(--gray); line-height: 1.7;">
                         ١. وێنەکەت باربکە یان بیخەرە سەر ناوچەی خوارەوە<br><br>
                         ٢. بە فرچەکە ئەو ناوچانە دیاری بکە کە دەتەوێت بیسڕیتەوە<br><br>
                         ٣. دوگمەی "سڕینەوە" کلیک بکە بۆ سڕینەوەی ناوچە دیاریکراوەکان<br><br>
@@ -327,93 +889,145 @@
             </div>
         </div>
 
-        <div class="creator-credit" style="text-align: center; margin-top: 2rem; color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.2);">
-            Created by Ibrahim Mala Taha | Powered by Advanced Image Processing
+        <div class="creator-credit">
+            Created by Ibrahim Mala Taha | Powered by Advanced Image Processing AI
         </div>
     </div>
 
+    <div class="smart-cursor" id="smartCursor"></div>
+
     <script>
-        // Main application
-        class ImageEditor {
+        // Main Application Class
+        class AdvancedImageEditor {
             constructor() {
+                // DOM Elements
                 this.canvas = document.getElementById('imageCanvas');
                 this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
+                this.fileInput = document.getElementById('fileInput');
+                this.uploadSection = document.getElementById('uploadSection');
+                this.editorContainer = document.getElementById('editorContainer');
+                this.removeBtn = document.getElementById('removeBtn');
+                this.undoBtn = document.getElementById('undoBtn');
+                this.enhanceBtn = document.getElementById('enhanceBtn');
+                this.downloadBtn = document.getElementById('downloadBtn');
+                this.removalQuality = document.getElementById('removalQuality');
+                this.blendMode = document.getElementById('blendMode');
+                this.brushSize = document.getElementById('brushSize');
+                this.brushSizeValue = document.getElementById('brushSizeValue');
+                this.edgeDetection = document.getElementById('edgeDetection');
+                this.edgeDetectionValue = document.getElementById('edgeDetectionValue');
+                this.sampleRadius = document.getElementById('sampleRadius');
+                this.sampleRadiusValue = document.getElementById('sampleRadiusValue');
+                this.progressContainer = document.getElementById('progressContainer');
+                this.progressBar = document.getElementById('progressBar');
+                this.statusMessage = document.getElementById('statusMessage');
+                this.smartCursor = document.getElementById('smartCursor');
+                this.toggleAdvanced = document.getElementById('toggleAdvanced');
+                this.advancedOptions = document.getElementById('advancedOptions');
+                this.brushPreview = document.getElementById('brushPreview');
+
+                // Application State
                 this.originalImage = null;
                 this.currentImage = null;
                 this.imageHistory = [];
                 this.selectionPoints = [];
                 this.isDrawing = false;
-                this.removalQuality = 'balanced';
-                this.blendMode = 'natural';
-                
+                this.currentTool = 'smart';
+                this.removalQualityValue = 'balanced';
+                this.blendModeValue = 'natural';
+                this.brushSizeValue = 30;
+                this.edgeDetectionLevel = 70;
+                this.sampleArea = 50;
+                this.lastKnownPosition = null;
+
+                // Initialize
                 this.init();
             }
-            
+
             init() {
                 this.setupEventListeners();
-                this.setupUI();
+                this.updateBrushPreview();
+                this.showStatus('ئامێری سڕینەوەی شت لە وێنە ئامادەکراوە', 'info');
             }
-            
+
             setupEventListeners() {
-                // File input
-                document.getElementById('fileInput').addEventListener('change', (e) => this.handleFileSelect(e));
+                // File Handling
+                this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
                 
-                // Drag and drop
-                const uploadSection = document.getElementById('uploadSection');
-                uploadSection.addEventListener('dragover', (e) => {
+                // Drag and Drop
+                this.uploadSection.addEventListener('dragover', (e) => {
                     e.preventDefault();
-                    uploadSection.classList.add('dragover');
+                    this.uploadSection.classList.add('dragover');
                 });
                 
-                uploadSection.addEventListener('dragleave', () => {
-                    uploadSection.classList.remove('dragover');
+                this.uploadSection.addEventListener('dragleave', () => {
+                    this.uploadSection.classList.remove('dragover');
                 });
                 
-                uploadSection.addEventListener('drop', (e) => {
+                this.uploadSection.addEventListener('drop', (e) => {
                     e.preventDefault();
-                    uploadSection.classList.remove('dragover');
+                    this.uploadSection.classList.remove('dragover');
                     const file = e.dataTransfer.files[0];
                     if (file) this.handleFile(file);
                 });
                 
-                // Canvas interactions
+                // Canvas Interactions
                 this.canvas.addEventListener('mousedown', (e) => this.startSelection(e));
                 this.canvas.addEventListener('mousemove', (e) => this.drawSelection(e));
                 this.canvas.addEventListener('mouseup', () => this.endSelection());
                 this.canvas.addEventListener('mouseout', () => this.endSelection());
+                this.canvas.addEventListener('mouseenter', (e) => this.updateSmartCursorPosition(e));
                 
-                // Touch support
+                // Touch Support
                 this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e));
                 this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e));
                 this.canvas.addEventListener('touchend', () => this.handleTouchEnd());
                 
-                // Tool controls
-                document.getElementById('removalQuality').addEventListener('change', (e) => {
-                    this.removalQuality = e.target.value;
-                    this.showStatus('کوالێتی سڕینەوە گۆڕدرا بۆ: ' + e.target.options[e.target.selectedIndex].text, 'info');
+                // Controls
+                this.removalQuality.addEventListener('change', (e) => {
+                    this.removalQualityValue = e.target.value;
+                    this.showStatus('جۆری سڕینەوە گۆڕدرا بۆ: ' + e.target.options[e.target.selectedIndex].text, 'info');
                 });
                 
-                document.getElementById('blendMode').addEventListener('change', (e) => {
-                    this.blendMode = e.target.value;
+                this.blendMode.addEventListener('change', (e) => {
+                    this.blendModeValue = e.target.value;
                     this.showStatus('جۆری تێکەڵکردن گۆڕدرا بۆ: ' + e.target.options[e.target.selectedIndex].text, 'info');
                 });
                 
-                // Action buttons
-                document.getElementById('removeBtn').addEventListener('click', () => this.removeSelectedArea());
-                document.getElementById('undoBtn').addEventListener('click', () => this.undoAction());
-                document.getElementById('enhanceBtn').addEventListener('click', () => this.enhanceImage());
-                document.getElementById('downloadBtn').addEventListener('click', () => this.downloadImage());
+                this.brushSize.addEventListener('input', (e) => {
+                    this.brushSizeValue = parseInt(e.target.value);
+                    this.brushSizeValue.textContent = this.brushSizeValue;
+                    this.updateBrushPreview();
+                });
+                
+                this.edgeDetection.addEventListener('input', (e) => {
+                    this.edgeDetectionLevel = parseInt(e.target.value);
+                    this.edgeDetectionValue.textContent = this.edgeDetectionLevel;
+                });
+                
+                this.sampleRadius.addEventListener('input', (e) => {
+                    this.sampleArea = parseInt(e.target.value);
+                    this.sampleRadiusValue.textContent = this.sampleArea;
+                });
+                
+                // Buttons
+                this.removeBtn.addEventListener('click', () => this.removeSelectedArea());
+                this.undoBtn.addEventListener('click', () => this.undoAction());
+                this.enhanceBtn.addEventListener('click', () => this.enhanceImage());
+                this.downloadBtn.addEventListener('click', () => this.downloadImage());
+                
+                // Advanced Options Toggle
+                this.toggleAdvanced.addEventListener('click', () => {
+                    this.advancedOptions.classList.toggle('active');
+                    this.toggleAdvanced.classList.toggle('active');
+                });
             }
-            
-            setupUI() {
-                // Initialize UI elements
-            }
-            
+
             handleFileSelect(e) {
                 const file = e.target.files[0];
                 if (file) this.handleFile(file);
             }
-            
+
             handleFile(file) {
                 if (!file.type.match('image.*')) {
                     this.showStatus('تکایە تەنها فایلی وێنە هەڵبژێرە', 'error');
@@ -426,8 +1040,8 @@
                     img.onload = () => {
                         this.originalImage = img;
                         this.setupCanvas(img);
-                        document.getElementById('uploadSection').style.display = 'none';
-                        document.getElementById('editorContainer').style.display = 'grid';
+                        this.uploadSection.style.display = 'none';
+                        this.editorContainer.style.display = 'grid';
                         this.saveToHistory();
                         this.showStatus('وێنەکەت بە سەرکەوتوویی بارکرا', 'success');
                     };
@@ -441,7 +1055,7 @@
                 };
                 reader.readAsDataURL(file);
             }
-            
+
             setupCanvas(img) {
                 // Calculate dimensions to fit container while maintaining aspect ratio
                 const container = this.canvas.parentElement;
@@ -456,97 +1070,116 @@
                 this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
                 this.currentImage = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
             }
-            
+
             startSelection(e) {
                 if (!this.originalImage) return;
                 
                 this.isDrawing = true;
                 const pos = this.getMousePos(e);
                 this.selectionPoints = [pos];
+                this.lastKnownPosition = pos;
+                
+                // Clear any existing selection drawings
+                this.redrawImage();
             }
-            
+
             drawSelection(e) {
                 if (!this.isDrawing || !this.originalImage) return;
                 const pos = this.getMousePos(e);
+                this.lastKnownPosition = pos;
+                
+                // Add point to selection
                 this.selectionPoints.push(pos);
                 
-                // Draw the selection
-                this.ctx.strokeStyle = 'rgba(255, 0, 0, 0.7)';
-                this.ctx.lineWidth = 2;
-                this.ctx.lineJoin = 'round';
-                this.ctx.lineCap = 'round';
-                this.ctx.beginPath();
+                // Redraw image and selection
+                this.redrawImage();
+                this.drawSelectionOutline();
                 
-                if (this.selectionPoints.length > 1) {
-                    this.ctx.moveTo(this.selectionPoints[0].x, this.selectionPoints[0].y);
-                    
-                    for (let i = 1; i < this.selectionPoints.length; i++) {
-                        const p1 = this.selectionPoints[i-1];
-                        const p2 = this.selectionPoints[i];
-                        const cpX = (p1.x + p2.x) / 2;
-                        const cpY = (p1.y + p2.y) / 2;
-                        this.ctx.quadraticCurveTo(cpX, cpY, p2.x, p2.y);
-                    }
-                }
-                
-                this.ctx.stroke();
+                // Update smart cursor position
+                this.updateSmartCursorPosition(e);
             }
-            
+
             endSelection() {
                 if (!this.isDrawing) return;
                 this.isDrawing = false;
                 
                 if (this.selectionPoints.length > 2) {
                     // Finalize the selection
-                    this.ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(this.selectionPoints[0].x, this.selectionPoints[0].y);
-                    
-                    for (let i = 1; i < this.selectionPoints.length; i++) {
-                        const p1 = this.selectionPoints[i-1];
-                        const p2 = this.selectionPoints[i];
-                        const cpX = (p1.x + p2.x) / 2;
-                        const cpY = (p1.y + p2.y) / 2;
-                        this.ctx.quadraticCurveTo(cpX, cpY, p2.x, p2.y);
-                    }
-                    
-                    this.ctx.closePath();
-                    this.ctx.fill();
-                    this.ctx.stroke();
-                    
+                    this.redrawImage();
+                    this.drawSelectionOutline(true);
                     this.showStatus('ناوچەی هەڵبژاردن دیاریکرا', 'info');
                 }
             }
-            
+
+            redrawImage() {
+                // Clear canvas and redraw the original image
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.drawImage(this.originalImage, 0, 0, this.canvas.width, this.canvas.height);
+            }
+
+            drawSelectionOutline(fill = false) {
+                if (this.selectionPoints.length < 2) return;
+                
+                this.ctx.strokeStyle = 'rgba(255, 0, 0, 0.7)';
+                this.ctx.lineWidth = 2;
+                this.ctx.lineJoin = 'round';
+                this.ctx.lineCap = 'round';
+                this.ctx.beginPath();
+                
+                // Start from first point
+                this.ctx.moveTo(this.selectionPoints[0].x, this.selectionPoints[0].y);
+                
+                // Draw smooth curve through points
+                for (let i = 1; i < this.selectionPoints.length; i++) {
+                    const p1 = this.selectionPoints[i-1];
+                    const p2 = this.selectionPoints[i];
+                    const cpX = (p1.x + p2.x) / 2;
+                    const cpY = (p1.y + p2.y) / 2;
+                    this.ctx.quadraticCurveTo(cpX, cpY, p2.x, p2.y);
+                }
+                
+                // If filling, close the path and fill
+                if (fill) {
+                    this.ctx.closePath();
+                    this.ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+                    this.ctx.fill();
+                }
+                
+                this.ctx.stroke();
+            }
+
             removeSelectedArea() {
-                if (!this.originalImage || this.selectionPoints.length === 0) {
+                if (!this.originalImage || this.selectionPoints.length < 3) {
                     this.showStatus('هیچ ناوچەیەک دیارینەکراوە', 'warning');
                     return;
                 }
                 
                 this.showStatus('سڕینەوەی ناوچە دیاریکراوەکان...', 'info');
-                document.getElementById('progressContainer').style.display = 'block';
+                this.progressContainer.style.display = 'block';
                 
-                // Simulate processing with progress updates
-                const totalSteps = 100;
-                let currentStep = 0;
+                // Use requestAnimationFrame for smooth progress updates
+                const startTime = performance.now();
+                const totalDuration = 1000; // 1 second for animation
                 
-                const processInterval = setInterval(() => {
-                    currentStep += 5;
-                    document.getElementById('progressBar').style.width = `${currentStep}%`;
+                const animateRemoval = (timestamp) => {
+                    const elapsed = timestamp - startTime;
+                    const progress = Math.min(elapsed / totalDuration, 1);
+                    this.progressBar.style.width = `${progress * 100}%`;
                     
-                    if (currentStep >= totalSteps) {
-                        clearInterval(processInterval);
-                        document.getElementById('progressContainer').style.display = 'none';
-                        
-                        // Apply the removal effect based on quality setting
+                    if (progress < 1) {
+                        requestAnimationFrame(animateRemoval);
+                    } else {
+                        // Apply the actual removal when animation completes
                         this.applyContentAwareRemoval();
                         this.saveToHistory();
+                        this.progressContainer.style.display = 'none';
                         this.showStatus('ناوچە دیاریکراوەکان بە سەرکەوتوویی سڕایەوە', 'success');
                     }
-                }, 50);
+                };
+                
+                requestAnimationFrame(animateRemoval);
             }
-            
+
             applyContentAwareRemoval() {
                 // Get image data
                 const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
@@ -563,7 +1196,7 @@
                 
                 // Determine sample size based on quality setting
                 let sampleSize;
-                switch(this.removalQuality) {
+                switch(this.removalQualityValue) {
                     case 'fast': sampleSize = 10; break;
                     case 'balanced': sampleSize = 30; break;
                     case 'high': sampleSize = 50; break;
@@ -590,55 +1223,72 @@
                 // Apply blending based on blend mode
                 this.applyBlending(imageData, minX, minY, maxX, maxY);
                 
+                // Put the modified image data back to canvas
                 this.ctx.putImageData(imageData, 0, 0);
+                
+                // Clear selection points
+                this.selectionPoints = [];
             }
-            
+
             getAverageColorAroundSelection(imageData, minX, minY, maxX, maxY, sampleSize) {
                 const {data, width, height} = imageData;
                 let r = 0, g = 0, b = 0, count = 0;
                 
-                // Sample above
+                // Sample above selection
                 for (let y = Math.max(0, minY - sampleSize); y < minY; y++) {
                     for (let x = Math.max(0, minX - sampleSize); x < Math.min(width, maxX + sampleSize); x++) {
-                        const idx = (y * width + x) * 4;
-                        r += data[idx];
-                        g += data[idx + 1];
-                        b += data[idx + 2];
-                        count++;
+                        if (!this.isPointInSelection(x, y)) {
+                            const idx = (y * width + x) * 4;
+                            r += data[idx];
+                            g += data[idx + 1];
+                            b += data[idx + 2];
+                            count++;
+                        }
                     }
                 }
                 
-                // Sample below
+                // Sample below selection
                 for (let y = maxY; y < Math.min(height, maxY + sampleSize); y++) {
                     for (let x = Math.max(0, minX - sampleSize); x < Math.min(width, maxX + sampleSize); x++) {
-                        const idx = (y * width + x) * 4;
-                        r += data[idx];
-                        g += data[idx + 1];
-                        b += data[idx + 2];
-                        count++;
+                        if (!this.isPointInSelection(x, y)) {
+                            const idx = (y * width + x) * 4;
+                            r += data[idx];
+                            g += data[idx + 1];
+                            b += data[idx + 2];
+                            count++;
+                        }
                     }
                 }
                 
-                // Sample left
+                // Sample left of selection
                 for (let x = Math.max(0, minX - sampleSize); x < minX; x++) {
                     for (let y = minY; y < maxY; y++) {
-                        const idx = (y * width + x) * 4;
-                        r += data[idx];
-                        g += data[idx + 1];
-                        b += data[idx + 2];
-                        count++;
+                        if (!this.isPointInSelection(x, y)) {
+                            const idx = (y * width + x) * 4;
+                            r += data[idx];
+                            g += data[idx + 1];
+                            b += data[idx + 2];
+                            count++;
+                        }
                     }
                 }
                 
-                // Sample right
+                // Sample right of selection
                 for (let x = maxX; x < Math.min(width, maxX + sampleSize); x++) {
                     for (let y = minY; y < maxY; y++) {
-                        const idx = (y * width + x) * 4;
-                        r += data[idx];
-                        g += data[idx + 1];
-                        b += data[idx + 2];
-                        count++;
+                        if (!this.isPointInSelection(x, y)) {
+                            const idx = (y * width + x) * 4;
+                            r += data[idx];
+                            g += data[idx + 1];
+                            b += data[idx + 2];
+                            count++;
+                        }
                     }
+                }
+                
+                // If no samples found, use fallback color
+                if (count === 0) {
+                    return { r: 240, g: 240, b: 240 };
                 }
                 
                 return {
@@ -647,18 +1297,15 @@
                     b: Math.round(b / count)
                 };
             }
-            
+
             applyBlending(imageData, minX, minY, maxX, maxY) {
-                // Apply different blending techniques based on blend mode
-                // This is a simplified version - real implementation would be more sophisticated
                 const {data, width, height} = imageData;
-                const blendWidth = Math.min(10, Math.min(width, height) / 10);
+                const blendWidth = Math.min(15, Math.min(width, height) / 10);
                 
-                for (let y = Math.max(0, minY); y < Math.min(height, maxY); y++) {
-                    for (let x = Math.max(0, minX); x < Math.min(width, maxX); x++) {
+                for (let y = Math.max(0, minY - blendWidth); y < Math.min(height, maxY + blendWidth); y++) {
+                    for (let x = Math.max(0, minX - blendWidth); x < Math.min(width, maxX + blendWidth); x++) {
                         if (this.isPointNearSelectionEdge(x, y, minX, minY, maxX, maxY, blendWidth)) {
                             const idx = (y * width + x) * 4;
-                            const originalIdx = idx;
                             
                             // Sample surrounding pixels
                             let r = 0, g = 0, b = 0, count = 0;
@@ -676,8 +1323,10 @@
                                 }
                             }
                             
-                            // Apply blending
+                            // Calculate blend factor based on distance from edge
                             const blendFactor = this.getBlendFactorForPixel(x, y, minX, minY, maxX, maxY, blendWidth);
+                            
+                            // Apply blending
                             data[idx] = Math.round(data[idx] * (1 - blendFactor) + (r / count) * blendFactor);
                             data[idx + 1] = Math.round(data[idx + 1] * (1 - blendFactor) + (g / count) * blendFactor);
                             data[idx + 2] = Math.round(data[idx + 2] * (1 - blendFactor) + (b / count) * blendFactor);
@@ -685,10 +1334,9 @@
                     }
                 }
             }
-            
+
             isPointInSelection(x, y) {
                 // Simple point-in-polygon test for the selection
-                // This is a simplified version - real implementation would be more accurate
                 let inside = false;
                 for (let i = 0, j = this.selectionPoints.length - 1; i < this.selectionPoints.length; j = i++) {
                     const xi = this.selectionPoints[i].x, yi = this.selectionPoints[i].y;
@@ -701,7 +1349,7 @@
                 
                 return inside;
             }
-            
+
             isPointNearSelectionEdge(x, y, minX, minY, maxX, maxY, width) {
                 // Check if point is near the edge of the selection
                 return (x >= minX - width && x <= minX + width && y >= minY && y <= maxY) ||
@@ -709,7 +1357,7 @@
                        (y >= minY - width && y <= minY + width && x >= minX && x <= maxX) ||
                        (y >= maxY - width && y <= maxY + width && x >= minX && x <= maxX);
             }
-            
+
             getBlendFactorForPixel(x, y, minX, minY, maxX, maxY, width) {
                 // Calculate blend factor based on distance from edge
                 const distLeft = x - minX;
@@ -720,7 +1368,7 @@
                 const minDist = Math.min(distLeft, distRight, distTop, distBottom);
                 return Math.min(1, Math.max(0, minDist / width));
             }
-            
+
             enhanceImage() {
                 if (!this.originalImage) {
                     this.showStatus('هیچ وێنەیەک بارنەکراوە', 'warning');
@@ -728,33 +1376,36 @@
                 }
                 
                 this.showStatus('باشترکردنی وێنە...', 'info');
-                document.getElementById('progressContainer').style.display = 'block';
+                this.progressContainer.style.display = 'block';
                 
-                // Simulate processing with progress updates
-                const totalSteps = 100;
-                let currentStep = 0;
+                // Simulate processing with animation
+                const startTime = performance.now();
+                const totalDuration = 1500; // 1.5 seconds for animation
                 
-                const enhanceInterval = setInterval(() => {
-                    currentStep += 5;
-                    document.getElementById('progressBar').style.width = `${currentStep}%`;
+                const animateEnhancement = (timestamp) => {
+                    const elapsed = timestamp - startTime;
+                    const progress = Math.min(elapsed / totalDuration, 1);
+                    this.progressBar.style.width = `${progress * 100}%`;
                     
-                    if (currentStep >= totalSteps) {
-                        clearInterval(enhanceInterval);
-                        document.getElementById('progressContainer').style.display = 'none';
-                        
-                        // Apply enhancement effects
+                    if (progress < 1) {
+                        requestAnimationFrame(animateEnhancement);
+                    } else {
+                        // Apply the actual enhancement when animation completes
                         this.applyEnhancementEffects();
                         this.saveToHistory();
+                        this.progressContainer.style.display = 'none';
                         this.showStatus('وێنەکە بە سەرکەوتوویی باشترکرایەوە', 'success');
                     }
-                }, 50);
+                };
+                
+                requestAnimationFrame(animateEnhancement);
             }
-            
+
             applyEnhancementEffects() {
                 const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
                 const {data} = imageData;
                 
-                // Simple enhancement effects for demo:
+                // Simple enhancement effects:
                 // 1. Adjust contrast
                 // 2. Sharpen edges
                 // 3. Reduce noise
@@ -773,7 +1424,7 @@
                 
                 this.ctx.putImageData(imageData, 0, 0);
             }
-            
+
             saveToHistory() {
                 const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
                 this.imageHistory.push(imageData);
@@ -783,7 +1434,7 @@
                     this.imageHistory.shift();
                 }
             }
-            
+
             undoAction() {
                 if (this.imageHistory.length > 1) {
                     this.imageHistory.pop(); // Remove current state
@@ -793,8 +1444,11 @@
                 } else {
                     this.showStatus('هیچ مێژوویەک نییە بۆ گەڕاندنەوە', 'warning');
                 }
+                
+                // Clear selection points
+                this.selectionPoints = [];
             }
-            
+
             downloadImage() {
                 if (!this.originalImage) {
                     this.showStatus('هیچ وێنەیەک بارنەکراوە', 'warning');
@@ -807,7 +1461,7 @@
                 link.click();
                 this.showStatus('وێنەکەت دابەزێنرا', 'success');
             }
-            
+
             getMousePos(e) {
                 const rect = this.canvas.getBoundingClientRect();
                 return {
@@ -815,7 +1469,37 @@
                     y: (e.clientY - rect.top) * (this.canvas.height / rect.height)
                 };
             }
-            
+
+            updateSmartCursorPosition(e) {
+                if (!this.originalImage) return;
+                
+                const pos = this.getMousePos(e);
+                this.smartCursor.style.left = `${e.clientX}px`;
+                this.smartCursor.style.top = `${e.clientY}px`;
+                this.smartCursor.style.display = 'block';
+                this.smartCursor.style.width = `${this.brushSizeValue}px`;
+                this.smartCursor.style.height = `${this.brushSizeValue}px`;
+            }
+
+            updateBrushPreview() {
+                this.brushPreview.style.setProperty('--brush-size', `${this.brushSizeValue}px`);
+            }
+
+            showStatus(message, type) {
+                this.statusMessage.textContent = message;
+                this.statusMessage.className = `status-message status-${type} fade-in`;
+                this.statusMessage.style.display = 'block';
+                
+                setTimeout(() => {
+                    this.statusMessage.classList.remove('fade-in');
+                    this.statusMessage.classList.add('fade-out');
+                    setTimeout(() => {
+                        this.statusMessage.style.display = 'none';
+                        this.statusMessage.classList.remove('fade-out');
+                    }, 500);
+                }, 3000);
+            }
+
             handleTouchStart(e) {
                 e.preventDefault();
                 const touch = e.touches[0];
@@ -825,7 +1509,7 @@
                 });
                 this.canvas.dispatchEvent(mouseEvent);
             }
-            
+
             handleTouchMove(e) {
                 e.preventDefault();
                 const touch = e.touches[0];
@@ -835,32 +1519,20 @@
                 });
                 this.canvas.dispatchEvent(mouseEvent);
             }
-            
+
             handleTouchEnd() {
                 const mouseEvent = new MouseEvent('mouseup', {});
                 this.canvas.dispatchEvent(mouseEvent);
             }
-            
-            showStatus(message, type) {
-                const statusElement = document.getElementById('statusMessage');
-                statusElement.textContent = message;
-                statusElement.className = `status-message status-${type} fade-in`;
-                statusElement.style.display = 'block';
-                
-                setTimeout(() => {
-                    statusElement.classList.remove('fade-in');
-                    statusElement.classList.add('fade-out');
-                    setTimeout(() => {
-                        statusElement.style.display = 'none';
-                        statusElement.classList.remove('fade-out');
-                    }, 500);
-                }, 3000);
-            }
         }
 
-        // Initialize the application
+        // Initialize the application when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
-            new ImageEditor();
+            const imageEditor = new AdvancedImageEditor();
+            
+            // Add animation to header
+            const header = document.querySelector('.header h1');
+            header.style.animation = 'float 3s ease-in-out infinite';
         });
     </script>
 </body>
