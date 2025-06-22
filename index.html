@@ -4,26 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سڕینەوەی زیرەکی شت لە وێنە</title>
+    <!-- TensorFlow.js and BodyPix for AI capabilities -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@latest"></script>
     <style>
-        /* Modern Color Palette */
-        :root {
-            --primary: #4361ee;
-            --primary-dark: #3a56d4;
-            --primary-light: #4895ef;
-            --secondary: #3f37c9;
-            --accent: #4cc9f0;
-            --danger: #f72585;
-            --success: #4cc9f0;
-            --warning: #f8961e;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --gray: #6c757d;
-            --light-gray: #e9ecef;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-
-        /* Base Styles */
         * {
             margin: 0;
             padding: 0;
@@ -32,402 +16,305 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 2rem;
+            padding: 20px;
             direction: rtl;
-            color: var(--dark);
-            line-height: 1.6;
-            overflow-x: hidden;
         }
 
-        /* Container with Glass Morphism Effect */
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 2rem;
-            padding: 3rem;
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            color: #4a5568;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .upload-section {
+            border: 3px dashed #cbd5e0;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #f7fafc, #edf2f7);
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            animation: fadeIn 0.8s ease-out;
         }
 
-        .container::before {
+        .upload-section:hover {
+            border-color: #667eea;
+            background: linear-gradient(45deg, #edf2f7, #e2e8f0);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .upload-section.dragover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .upload-section::before {
             content: '';
             position: absolute;
             top: -50%;
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
-            z-index: -1;
-            animation: rotate 20s linear infinite;
+            background: linear-gradient(
+                to bottom right,
+                rgba(102, 126, 234, 0.1) 0%,
+                rgba(102, 126, 234, 0) 50%,
+                rgba(102, 126, 234, 0.1) 100%
+            );
+            transform: rotate(45deg);
+            z-index: 0;
         }
 
-        /* Header Styles */
-        .header {
-            text-align: center;
-            margin-bottom: 3rem;
-            position: relative;
-            z-index: 1;
-            animation: slideDown 0.8s ease-out;
+        .file-input {
+            display: none;
         }
 
-        .header h1 {
-            color: transparent;
-            font-size: 3.2rem;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            background-clip: text;
-            font-weight: 800;
-            letter-spacing: -0.05rem;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            position: relative;
-            display: inline-block;
-        }
-
-        .header h1::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            right: 0;
-            width: 100px;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            border-radius: 2px;
-            margin: 0 auto;
-        }
-
-        .header p {
-            color: var(--dark);
-            font-size: 1.2rem;
-            max-width: 700px;
-            margin: 0 auto;
-            line-height: 1.8;
-            opacity: 0.9;
-        }
-
-        /* Upload Section */
-        .upload-section {
-            border: 3px dashed rgba(67, 97, 238, 0.3);
-            border-radius: 1.5rem;
-            padding: 4rem 2rem;
-            text-align: center;
-            margin-bottom: 3rem;
-            transition: var(--transition);
-            background: rgba(255, 255, 255, 0.7);
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            animation: fadeInUp 1s ease-out;
-        }
-
-        .upload-section:hover {
-            border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.85);
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(26, 41, 128, 0.15);
-        }
-
-        .upload-section.dragover {
-            border-color: var(--primary);
-            background: rgba(67, 97, 238, 0.05);
-            animation: pulse 1.5s infinite;
-        }
-
-        .upload-section h2 {
-            color: var(--primary);
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-            font-weight: 600;
-        }
-
-        .upload-section p {
-            color: var(--dark);
-            opacity: 0.8;
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
-        }
-
-        /* Buttons */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem 2.5rem;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
+        .upload-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
             border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
             position: relative;
             overflow: hidden;
-            box-shadow: var(--shadow);
             z-index: 1;
         }
 
-        .btn::before {
+        .upload-btn::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(45deg, rgba(255,255,255,0.2), rgba(255,255,255,0));
+            background: linear-gradient(45deg, #764ba2, #667eea);
             opacity: 0;
-            transition: var(--transition);
+            transition: opacity 0.3s ease;
             z-index: -1;
         }
 
-        .btn:hover::before {
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .upload-btn:hover::before {
             opacity: 1;
         }
 
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn:active {
-            transform: translateY(1px);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, var(--primary), var(--primary-light));
-            color: white;
-        }
-
-        .btn-secondary {
-            background: linear-gradient(45deg, var(--accent), var(--success));
-            color: white;
-        }
-
-        .btn-danger {
-            background: linear-gradient(45deg, var(--danger), #b5179e);
-            color: white;
-        }
-
-        .btn-warning {
-            background: linear-gradient(45deg, var(--warning), #f3722c);
-            color: white;
-        }
-
-        .btn-success {
-            background: linear-gradient(45deg, var(--success), #4895ef);
-            color: white;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-outline:hover {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-icon {
-            margin-left: 0.5rem;
-            font-size: 1.2rem;
-        }
-
-        /* Editor Layout */
         .editor-container {
             display: none;
-            grid-template-columns: 1fr 400px;
-            gap: 2.5rem;
-            margin-top: 2rem;
-            animation: fadeIn 1s ease-out;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            margin-top: 30px;
         }
 
-        /* Canvas Container */
         .canvas-container {
             position: relative;
-            border-radius: 1.5rem;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            background: var(--light);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            min-height: 600px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
-
-        .canvas-container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            background: #f8f9fa;
+            border: 1px solid #e2e8f0;
         }
 
         #imageCanvas {
             max-width: 100%;
-            max-height: 80vh;
+            height: auto;
             display: block;
             cursor: crosshair;
-            transition: var(--transition);
-            background-color: #f5f5f5;
-            background-image: 
-                linear-gradient(45deg, #e0e0e0 25%, transparent 25%),
-                linear-gradient(-45deg, #e0e0e0 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #e0e0e0 75%),
-                linear-gradient(-45deg, transparent 75%, #e0e0e0 75%);
-            background-size: 20px 20px;
-            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            transition: transform 0.3s ease;
         }
 
-        /* Tools Panel */
+        #imageCanvas:hover {
+            transform: scale(1.01);
+        }
+
         .tools-panel {
             background: linear-gradient(145deg, #f8f9fa, #e9ecef);
-            border-radius: 1.5rem;
-            padding: 2rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
-            height: fit-content;
-            position: sticky;
-            top: 2rem;
-            animation: slideInRight 1s ease-out;
+            gap: 20px;
         }
 
-        /* Tool Groups */
         .tool-group {
-            margin-bottom: 1.5rem;
-            background: rgba(255, 255, 255, 0.85);
-            padding: 1.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             border: 1px solid rgba(0, 0, 0, 0.05);
-            transition: var(--transition);
-        }
-
-        .tool-group:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
 
         .tool-group h3 {
-            color: var(--dark);
-            margin-bottom: 1.5rem;
-            font-size: 1.3rem;
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
             display: flex;
             align-items: center;
-            gap: 0.8rem;
-            position: relative;
-            padding-bottom: 0.8rem;
+            gap: 8px;
         }
 
-        .tool-group h3::after {
+        .tool-group h3::before {
             content: '';
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 50px;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            border-radius: 3px;
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
         }
 
-        .tool-group h3 i {
-            color: var(--primary);
-            font-size: 1.2rem;
-        }
-
-        /* Form Elements */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.8rem;
-            font-size: 0.95rem;
-            color: var(--dark);
-            opacity: 0.9;
-            font-weight: 500;
-        }
-
-        .form-control {
+        .brush-size {
             width: 100%;
-            padding: 0.8rem 1rem;
-            border-radius: 0.5rem;
-            border: 1px solid var(--light-gray);
-            background: white;
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
-        }
-
-        /* Range Slider */
-        .range-slider {
-            width: 100%;
-            margin: 1rem 0;
+            margin: 10px 0;
             -webkit-appearance: none;
             height: 8px;
             border-radius: 4px;
-            background: var(--light-gray);
+            background: #e2e8f0;
             outline: none;
-            transition: var(--transition);
         }
 
-        .range-slider:hover {
-            background: #d1d5db;
-        }
-
-        .range-slider::-webkit-slider-thumb {
+        .brush-size::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
+            background: linear-gradient(45deg, #667eea, #764ba2);
             cursor: pointer;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            transition: var(--transition);
-            border: 3px solid white;
         }
 
-        .range-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.1);
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+        .action-btn {
+            width: 100%;
+            padding: 14px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .value-display {
-            font-size: 0.95rem;
-            color: var(--primary);
-            font-weight: 600;
-            margin-right: 0.5rem;
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        /* Brush Preview */
+        .action-btn:hover::before {
+            opacity: 1;
+        }
+
+        .action-btn i {
+            font-size: 1.2rem;
+        }
+
+        .action-btn.remove {
+            background: linear-gradient(45deg, #e53e3e, #c53030);
+            color: white;
+        }
+
+        .action-btn.remove:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(229, 62, 62, 0.3);
+        }
+
+        .action-btn.undo {
+            background: linear-gradient(45deg, #4299e1, #3182ce);
+            color: white;
+        }
+
+        .action-btn.undo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(66, 153, 225, 0.3);
+        }
+
+        .action-btn.download {
+            background: linear-gradient(45deg, #38a169, #2f855a);
+            color: white;
+        }
+
+        .action-btn.download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(56, 161, 105, 0.3);
+        }
+
+        .action-btn.ai-enhance {
+            background: linear-gradient(45deg, #9f7aea, #805ad5);
+            color: white;
+        }
+
+        .action-btn.ai-enhance:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(159, 122, 234, 0.3);
+        }
+
         .brush-preview {
-            width: 120px;
-            height: 120px;
-            border: 3px solid var(--light-gray);
-            border-radius: 1rem;
-            margin: 1.5rem auto;
+            width: 100px;
+            height: 100px;
+            border: 3px solid #e2e8f0;
+            border-radius: 15px;
+            margin: 15px auto;
             position: relative;
             background: linear-gradient(135deg, #f7fafc, #edf2f7);
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.1);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
             overflow: hidden;
-            animation: pulse 2s infinite;
         }
 
         .brush-preview::before {
@@ -436,211 +323,146 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: linear-gradient(45deg, var(--primary), var(--accent));
+            background: linear-gradient(45deg, #667eea, #764ba2);
             border-radius: 50%;
-            width: var(--brush-size, 30px);
-            height: var(--brush-size, 30px);
-            box-shadow: 0 3px 10px rgba(67, 97, 238, 0.4);
+            width: var(--brush-size, 20px);
+            height: var(--brush-size, 20px);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+            animation: pulse 2s infinite;
         }
 
-        /* Action Buttons */
-        .action-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-top: 1.5rem;
+        .brush-preview::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px dashed #667eea;
+            border-radius: 50%;
+            width: calc(var(--brush-size, 20px) + 10px);
+            height: calc(var(--brush-size, 20px) + 10px);
+            animation: rotate 3s linear infinite;
         }
 
-        .action-buttons .btn {
-            width: 100%;
-            padding: 0.8rem;
-            font-size: 0.95rem;
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.1); }
         }
 
-        /* Smart Cursor */
-        .smart-cursor {
+        @keyframes rotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .smart-brush-cursor {
             position: absolute;
             pointer-events: none;
             z-index: 1000;
-            border: 3px solid var(--primary);
+            border: 3px solid #667eea;
             border-radius: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 0 2px white, 0 0 20px rgba(67, 97, 238, 0.5);
+            box-shadow: 0 0 0 2px white, 0 0 20px rgba(102, 126, 234, 0.5);
+            animation: cursorPulse 1.5s infinite;
             mix-blend-mode: multiply;
-            display: none;
-            transition: transform 0.1s ease;
         }
 
-        /* Progress Bar */
-        .progress-container {
-            width: 100%;
-            height: 8px;
-            background: var(--light-gray);
-            border-radius: 4px;
-            margin-top: 1.5rem;
-            overflow: hidden;
-            display: none;
+        @keyframes cursorPulse {
+            0%, 100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
         }
 
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            width: 0%;
-            transition: width 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .progress-bar::after {
-            content: '';
+        .selection-overlay {
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(
-                90deg,
-                rgba(255, 255, 255, 0) 0%,
-                rgba(255, 255, 255, 0.3) 50%,
-                rgba(255, 255, 255, 0) 100%
-            );
-            animation: progressShine 1.5s infinite;
+            pointer-events: none;
+            mix-blend-mode: multiply;
         }
 
-        /* Status Messages */
-        .status-message {
+        .ai-detection-hint {
+            background: linear-gradient(45deg, #9f7aea, #805ad5);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin: 10px 0;
             text-align: center;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin: 1rem 0;
-            font-size: 0.95rem;
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .status-info {
-            background-color: rgba(72, 149, 239, 0.1);
-            color: var(--primary-light);
-            border: 1px solid rgba(72, 149, 239, 0.2);
-        }
-
-        .status-success {
-            background-color: rgba(76, 201, 240, 0.1);
-            color: var(--success);
-            border: 1px solid rgba(76, 201, 240, 0.2);
-        }
-
-        .status-warning {
-            background-color: rgba(248, 150, 30, 0.1);
-            color: var(--warning);
-            border: 1px solid rgba(248, 150, 30, 0.2);
-        }
-
-        .status-error {
-            background-color: rgba(247, 37, 133, 0.1);
-            color: var(--danger);
-            border: 1px solid rgba(247, 37, 133, 0.2);
-        }
-
-        /* Tooltip */
-        .tooltip {
-            position: relative;
-            display: inline-block;
-        }
-
-        .tooltip .tooltip-text {
-            visibility: hidden;
-            width: 220px;
-            background-color: var(--dark);
-            color: #fff;
-            text-align: center;
-            border-radius: 0.5rem;
-            padding: 0.8rem;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 0.85rem;
-            font-weight: normal;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .tooltip .tooltip-text::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: var(--dark) transparent transparent transparent;
-        }
-
-        .tooltip:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        /* Advanced Options */
-        .advanced-options {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease;
-            margin-top: 0;
-        }
-
-        .advanced-options.active {
-            max-height: 500px;
-            margin-top: 1.5rem;
-        }
-
-        .toggle-advanced {
+            animation: slideIn 0.5s ease;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            color: var(--primary);
-            font-size: 0.95rem;
-            margin-top: 1rem;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            transition: var(--transition);
+            justify-content: center;
+            gap: 6px;
         }
 
-        .toggle-advanced:hover {
-            background: rgba(67, 97, 238, 0.1);
+        .ai-loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            color: #4a5568;
+            font-size: 0.9rem;
         }
 
-        .toggle-advanced i {
-            transition: transform 0.3s ease;
+        .ai-loading span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            margin: 0 3px;
+            animation: bounce 1.4s infinite ease-in-out;
         }
 
-        .toggle-advanced.active i {
-            transform: rotate(180deg);
+        .ai-loading span:nth-child(2) {
+            animation-delay: 0.2s;
         }
 
-        /* Creator Credit */
+        .ai-loading span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-8px); }
+        }
+
         .creator-credit {
             text-align: center;
-            margin-top: 3rem;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.95rem;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            animation: fadeIn 1s ease-out;
+            margin-top: 30px;
+            color: #4a5568;
+            font-size: 0.9rem;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
         }
 
-        /* Responsive Design */
-        @media (max-width: 1200px) {
-            .container {
-                padding: 2rem;
-            }
-            
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
             .editor-container {
                 grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
             }
             
             .tools-panel {
@@ -648,152 +470,102 @@
             }
         }
 
-        @media (max-width: 768px) {
-            .container {
-                padding: 1.5rem;
-                border-radius: 1.2rem;
-            }
-            
-            .header h1 {
-                font-size: 2.4rem;
-            }
-            
-            .upload-section {
-                padding: 3rem 1.5rem;
-            }
-            
-            .action-buttons {
-                grid-template-columns: 1fr;
-            }
-            
-            .btn {
-                padding: 0.8rem 1.5rem;
-                font-size: 1rem;
-            }
+        /* New AI specific styles */
+        .ai-tools-section {
+            background: rgba(159, 122, 234, 0.1);
+            border: 1px dashed #9f7aea;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
         }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 1rem;
-            }
-            
-            .container {
-                padding: 1.2rem;
-                border-radius: 1rem;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .header p {
-                font-size: 1rem;
-            }
-            
-            .upload-section {
-                padding: 2rem 1rem;
-            }
-            
-            .tool-group {
-                padding: 1.2rem;
-            }
+        
+        .ai-tools-section h4 {
+            color: #805ad5;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        
+        .ai-tools-section h4::before {
+            content: '🧠';
+            font-size: 1.2rem;
         }
-
-        @keyframes fadeInUp {
-            from { 
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to { 
-                opacity: 1;
-                transform: translateY(0);
-            }
+        
+        .ai-mode-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+            margin-bottom: 10px;
         }
-
-        @keyframes slideDown {
-            from { 
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to { 
-                opacity: 1;
-                transform: translateY(0);
-            }
+        
+        .ai-mode-toggle label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            flex-grow: 1;
         }
-
-        @keyframes slideInRight {
-            from { 
-                opacity: 0;
-                transform: translateX(30px);
-            }
-            to { 
-                opacity: 1;
-                transform: translateX(0);
-            }
+        
+        .ai-mode-toggle .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
         }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
+        
+        .ai-mode-toggle input:checked + .toggle-switch {
+            background: #667eea;
         }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        
+        .ai-mode-toggle .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
-
-        @keyframes progressShine {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+        
+        .ai-mode-toggle input:checked + .toggle-switch::after {
+            left: calc(100% - 22px);
         }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        
+        .ai-precision-control {
+            margin-top: 15px;
         }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(67, 97, 238, 0.5);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary);
+        
+        .ai-precision-control label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
         }
     </style>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-magic"></i> سڕینەوەی زیرەکی شت لە وێنە</h1>
-            <p>وێنەکەت هەڵبژێرە و شتەکانی ناخوازراوت لێ بسڕەوە بە شێوەیەکی زیرەک و سروشتی</p>
+            <h1>سڕینەوەی زیرەکی شت لە وێنە</h1>
+            <p>وێنەکەت هەڵبژێرە و شتەکانی ناخوازراوت لێ بسڕەوە بە شێوەیەکی زیرەک بە یارمەتی AI</p>
         </div>
 
         <div class="upload-section" id="uploadSection">
             <div>
-                <h2><i class="fas fa-cloud-upload-alt"></i> وێنەکەت بخەرە ئێرە</h2>
-                <p>یان کلیک بکە بۆ هەڵبژاردنی فایل</p>
-                <button class="btn btn-primary btn-lg" onclick="document.getElementById('fileInput').click()">
-                    <i class="fas fa-folder-open btn-icon"></i> هەڵبژاردنی وێنە
+                <h2>وێنەکەت بخەرە ئێرە</h2>
+                <p>یان کلیک بکە بۆ هەڵبژاردن</p>
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-cloud-upload-alt"></i> هەڵبژاردنی وێنە
                 </button>
                 <input type="file" id="fileInput" class="file-input" accept="image/*">
             </div>
@@ -802,738 +574,710 @@
         <div class="editor-container" id="editorContainer">
             <div class="canvas-container">
                 <canvas id="imageCanvas"></canvas>
-                <div class="progress-container" id="progressContainer">
-                    <div class="progress-bar" id="progressBar"></div>
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress" id="progress"></div>
                 </div>
-                <div class="status-message" id="statusMessage"></div>
+                <div class="ai-loading" id="aiLoading">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <p>AI کاردەکات لەسەر وێنەکەت...</p>
+                </div>
             </div>
             
             <div class="tools-panel">
                 <div class="tool-group">
-                    <h3><i class="fas fa-sliders-h"></i> ڕێکخستنەکان</h3>
+                    <h3>فرچەی زیرەک</h3>
+                    <div class="ai-detection-hint">
+                        <i class="fas fa-brain"></i> فرچەی زیرەک - خۆکارانە لێوارەکان دەناسێتەوە
+                    </div>
+                    <label for="brushSize">قەبارەی فرچە: <span id="brushSizeValue">20</span>px</label>
+                    <input type="range" id="brushSize" class="brush-size" min="10" max="80" value="20">
+                    <div class="brush-preview" id="brushPreview"></div>
                     
-                    <div class="form-group">
-                        <label for="removalQuality">جۆری سڕینەوە:</label>
-                        <select id="removalQuality" class="form-control">
-                            <option value="fast">خێرا (کوالێتی نزم)</option>
-                            <option value="balanced" selected>هاوسەنگ (پێشنیارکراو)</option>
-                            <option value="high">بەرز (کوالێتی باش)</option>
-                            <option value="best">باشترین (کوالێتی زۆر بەرز)</option>
-                        </select>
+                    <div class="ai-mode-toggle">
+                        <label>
+                            <input type="checkbox" id="smartMode" checked>
+                            <span>دۆخی زیرەکی AI</span>
+                        </label>
+                        <div class="toggle-switch"></div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="blendMode">جۆری تێکەڵکردن:</label>
-                        <select id="blendMode" class="form-control">
-                            <option value="natural">سروشتی (پێشنیارکراو)</option>
-                            <option value="smooth">نەرم</option>
-                            <option value="sharp">تێک</option>
-                        </select>
-                    </div>
-                    
-                    <div class="toggle-advanced" id="toggleAdvanced">
-                        <span>ڕێکخستنە پێشکەوتووەکان</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    
-                    <div class="advanced-options" id="advancedOptions">
-                        <div class="form-group">
-                            <label for="brushSize">قەبارەی فرچە: <span id="brushSizeValue">30</span>px</label>
-                            <input type="range" id="brushSize" class="range-slider" min="10" max="100" value="30">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="edgeDetection">ئاستی ناسینەوەی لێوار: <span id="edgeDetectionValue">70</span>%</label>
-                            <input type="range" id="edgeDetection" class="range-slider" min="0" max="100" value="70">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="sampleRadius">شوێنی نەخشەکێشان: <span id="sampleRadiusValue">50</span>px</label>
-                            <input type="range" id="sampleRadius" class="range-slider" min="10" max="200" value="50">
-                        </div>
-                        
-                        <div class="brush-preview" id="brushPreview"></div>
+                    <div class="ai-precision-control">
+                        <label for="aiPrecision">ئاستی دەقایەتی AI: <span id="aiPrecisionValue">70</span>%</label>
+                        <input type="range" id="aiPrecision" class="brush-size" min="10" max="100" value="70">
                     </div>
                 </div>
 
                 <div class="tool-group">
-                    <h3><i class="fas fa-tools"></i> ئامرازەکان</h3>
-                    
-                    <button class="btn btn-danger" id="removeBtn">
-                        <i class="fas fa-eraser btn-icon"></i> سڕینەوەی ناوچەکان
+                    <h3>کارەکان</h3>
+                    <button class="action-btn remove" id="removeBtn">
+                        <i class="fas fa-eraser"></i> سڕینەوەی ناوچەکان
                     </button>
-                    
-                    <button class="btn btn-warning" id="undoBtn">
-                        <i class="fas fa-undo btn-icon"></i> گەڕاندنەوە
+                    <button class="action-btn undo" id="undoBtn">
+                        <i class="fas fa-undo"></i> گەڕاندنەوە
                     </button>
-                    
-                    <button class="btn btn-success" id="enhanceBtn">
-                        <i class="fas fa-magic btn-icon"></i> باشترکردنی وێنە
+                    <button class="action-btn download" id="downloadBtn">
+                        <i class="fas fa-download"></i> دابەزاندنی وێنە
                     </button>
-                    
-                    <button class="btn btn-primary" id="downloadBtn">
-                        <i class="fas fa-download btn-icon"></i> دابەزاندنی وێنە
+                    <button class="action-btn ai-enhance" id="aiEnhanceBtn">
+                        <i class="fas fa-magic"></i> باشترکردنی AI
                     </button>
                 </div>
 
                 <div class="tool-group">
-                    <h3><i class="fas fa-info-circle"></i> ڕێنمایی</h3>
-                    <p style="font-size: 0.95rem; color: var(--gray); line-height: 1.7;">
-                        ١. وێنەکەت باربکە یان بیخەرە سەر ناوچەی خوارەوە<br><br>
-                        ٢. بە فرچەکە ئەو ناوچانە دیاری بکە کە دەتەوێت بیسڕیتەوە<br><br>
-                        ٣. دوگمەی "سڕینەوە" کلیک بکە بۆ سڕینەوەی ناوچە دیاریکراوەکان<br><br>
-                        ٤. دوگمەی "باشترکردن" کلیک بکە بۆ باشترکردنی کوالێتی وێنە<br><br>
-                        ٥. دوگمەی "دابەزاندن" کلیک بکە بۆ هەڵگرتنی وێنەکەت
+                    <h3>ڕێنمایی</h3>
+                    <p style="font-size: 0.9rem; color: #666;">
+                        ١. فرچەکە بەکار بهێنە بۆ نیشانکردنی ئەو شتانەی دەتەوێت بیانسڕیتەوە
+                        <br><br>
+                        ٢. دوگمەی "سڕینەوەی ناوچەکان" کلیک بکە
+                        <br><br>
+                        ٣. بۆ باشترکردنی ئەنجامەکە، دوگمەی "باشترکردنی AI" کلیک بکە
+                        <br><br>
+                        ٤. وێنەکە دابەزێنە
+                    </p>
+                </div>
+                
+                <div class="ai-tools-section">
+                    <h4>تایبەتمەندییەکانی AI</h4>
+                    <p style="font-size: 0.85rem; color: #666; line-height: 1.5;">
+                        ئەم ئامرازە بە یارمەتی تەکنەلۆژیای TensorFlow.js کاردەکات بۆ:
+                        <br>- ناسینەوەی خۆکارانەی کەس و شت
+                        <br>- سڕینەوەی وێنە بە شێوەیەکی سروشتی
+                        <br>- باشترکردنی کوالێتی وێنە دوای سڕینەوە
                     </p>
                 </div>
             </div>
         </div>
 
         <div class="creator-credit">
-            Created by Ibrahim Mala Taha | Powered by Advanced Image Processing AI
+            Created by Ibrahim Mala Taha | Powered by TensorFlow.js
         </div>
     </div>
 
-    <div class="smart-cursor" id="smartCursor"></div>
-
     <script>
-        // Main Application Class
-        class AdvancedImageEditor {
-            constructor() {
-                // DOM Elements
-                this.canvas = document.getElementById('imageCanvas');
-                this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
-                this.fileInput = document.getElementById('fileInput');
-                this.uploadSection = document.getElementById('uploadSection');
-                this.editorContainer = document.getElementById('editorContainer');
-                this.removeBtn = document.getElementById('removeBtn');
-                this.undoBtn = document.getElementById('undoBtn');
-                this.enhanceBtn = document.getElementById('enhanceBtn');
-                this.downloadBtn = document.getElementById('downloadBtn');
-                this.removalQuality = document.getElementById('removalQuality');
-                this.blendMode = document.getElementById('blendMode');
-                this.brushSize = document.getElementById('brushSize');
-                this.brushSizeValue = document.getElementById('brushSizeValue');
-                this.edgeDetection = document.getElementById('edgeDetection');
-                this.edgeDetectionValue = document.getElementById('edgeDetectionValue');
-                this.sampleRadius = document.getElementById('sampleRadius');
-                this.sampleRadiusValue = document.getElementById('sampleRadiusValue');
-                this.progressContainer = document.getElementById('progressContainer');
-                this.progressBar = document.getElementById('progressBar');
-                this.statusMessage = document.getElementById('statusMessage');
-                this.smartCursor = document.getElementById('smartCursor');
-                this.toggleAdvanced = document.getElementById('toggleAdvanced');
-                this.advancedOptions = document.getElementById('advancedOptions');
-                this.brushPreview = document.getElementById('brushPreview');
+        const canvas = document.getElementById('imageCanvas');
+        const ctx = canvas.getContext('2d');
+        const fileInput = document.getElementById('fileInput');
+        const uploadSection = document.getElementById('uploadSection');
+        const editorContainer = document.getElementById('editorContainer');
+        const brushSizeSlider = document.getElementById('brushSize');
+        const brushSizeValue = document.getElementById('brushSizeValue');
+        const brushPreview = document.getElementById('brushPreview');
+        const smartModeCheckbox = document.getElementById('smartMode');
+        const removeBtn = document.getElementById('removeBtn');
+        const undoBtn = document.getElementById('undoBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const aiEnhanceBtn = document.getElementById('aiEnhanceBtn');
+        const aiPrecisionSlider = document.getElementById('aiPrecision');
+        const aiPrecisionValue = document.getElementById('aiPrecisionValue');
+        const progressBar = document.getElementById('progressBar');
+        const progress = document.getElementById('progress');
+        const aiLoading = document.getElementById('aiLoading');
 
-                // Application State
-                this.originalImage = null;
-                this.currentImage = null;
-                this.imageHistory = [];
-                this.selectionPoints = [];
-                this.isDrawing = false;
-                this.currentTool = 'smart';
-                this.removalQualityValue = 'balanced';
-                this.blendModeValue = 'natural';
-                this.brushSizeValue = 30;
-                this.edgeDetectionLevel = 70;
-                this.sampleArea = 50;
-                this.lastKnownPosition = null;
+        let originalImage = null;
+        let maskCanvas = null;
+        let maskCtx = null;
+        let isDrawing = false;
+        let brushSize = 20;
+        let smartMode = true;
+        let aiPrecision = 70;
+        let imageHistory = [];
+        let customCursor = null;
+        let lastDrawPoint = null;
+        let aiModel = null;
+        let isAILoading = false;
 
-                // Initialize
-                this.init();
+        // Initialize
+        updateBrushPreview();
+        loadAIModel();
+
+        // File input handler
+        fileInput.addEventListener('change', handleFileSelect);
+
+        // Drag and drop
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('dragover');
+        });
+
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
             }
+        });
 
-            init() {
-                this.setupEventListeners();
-                this.updateBrushPreview();
-                this.showStatus('ئامێری سڕینەوەی شت لە وێنە ئامادەکراوە', 'info');
-            }
+        // Brush size slider
+        brushSizeSlider.addEventListener('input', (e) => {
+            brushSize = parseInt(e.target.value);
+            brushSizeValue.textContent = brushSize;
+            updateBrushPreview();
+            updateCustomCursor();
+        });
 
-            setupEventListeners() {
-                // File Handling
-                this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
-                
-                // Drag and Drop
-                this.uploadSection.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    this.uploadSection.classList.add('dragover');
+        // AI Precision slider
+        aiPrecisionSlider.addEventListener('input', (e) => {
+            aiPrecision = parseInt(e.target.value);
+            aiPrecisionValue.textContent = aiPrecision;
+        });
+
+        // Smart mode toggle
+        smartModeCheckbox.addEventListener('change', (e) => {
+            smartMode = e.target.checked;
+        });
+
+        // Canvas drawing with smart features
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        canvas.addEventListener('mouseenter', showCustomCursor);
+        canvas.addEventListener('mouseleave', hideCustomCursor);
+
+        // Touch events for mobile
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousedown', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const mouseEvent = new MouseEvent('mouseup', {});
+            canvas.dispatchEvent(mouseEvent);
+        });
+
+        // Action buttons
+        removeBtn.addEventListener('click', removeSelectedAreas);
+        undoBtn.addEventListener('click', undo);
+        downloadBtn.addEventListener('click', downloadImage);
+        aiEnhanceBtn.addEventListener('click', enhanceWithAI);
+
+        async function loadAIModel() {
+            try {
+                showAILoading("بارکردنی مۆدێلی AI...");
+                aiModel = await bodyPix.load({
+                    architecture: 'MobileNetV1',
+                    outputStride: 16,
+                    multiplier: 0.75,
+                    quantBytes: 2
                 });
-                
-                this.uploadSection.addEventListener('dragleave', () => {
-                    this.uploadSection.classList.remove('dragover');
-                });
-                
-                this.uploadSection.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    this.uploadSection.classList.remove('dragover');
-                    const file = e.dataTransfer.files[0];
-                    if (file) this.handleFile(file);
-                });
-                
-                // Canvas Interactions
-                this.canvas.addEventListener('mousedown', (e) => this.startSelection(e));
-                this.canvas.addEventListener('mousemove', (e) => this.drawSelection(e));
-                this.canvas.addEventListener('mouseup', () => this.endSelection());
-                this.canvas.addEventListener('mouseout', () => this.endSelection());
-                this.canvas.addEventListener('mouseenter', (e) => this.updateSmartCursorPosition(e));
-                
-                // Touch Support
-                this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e));
-                this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e));
-                this.canvas.addEventListener('touchend', () => this.handleTouchEnd());
-                
-                // Controls
-                this.removalQuality.addEventListener('change', (e) => {
-                    this.removalQualityValue = e.target.value;
-                    this.showStatus('جۆری سڕینەوە گۆڕدرا بۆ: ' + e.target.options[e.target.selectedIndex].text, 'info');
-                });
-                
-                this.blendMode.addEventListener('change', (e) => {
-                    this.blendModeValue = e.target.value;
-                    this.showStatus('جۆری تێکەڵکردن گۆڕدرا بۆ: ' + e.target.options[e.target.selectedIndex].text, 'info');
-                });
-                
-                this.brushSize.addEventListener('input', (e) => {
-                    this.brushSizeValue = parseInt(e.target.value);
-                    this.brushSizeValue.textContent = this.brushSizeValue;
-                    this.updateBrushPreview();
-                });
-                
-                this.edgeDetection.addEventListener('input', (e) => {
-                    this.edgeDetectionLevel = parseInt(e.target.value);
-                    this.edgeDetectionValue.textContent = this.edgeDetectionLevel;
-                });
-                
-                this.sampleRadius.addEventListener('input', (e) => {
-                    this.sampleArea = parseInt(e.target.value);
-                    this.sampleRadiusValue.textContent = this.sampleArea;
-                });
-                
-                // Buttons
-                this.removeBtn.addEventListener('click', () => this.removeSelectedArea());
-                this.undoBtn.addEventListener('click', () => this.undoAction());
-                this.enhanceBtn.addEventListener('click', () => this.enhanceImage());
-                this.downloadBtn.addEventListener('click', () => this.downloadImage());
-                
-                // Advanced Options Toggle
-                this.toggleAdvanced.addEventListener('click', () => {
-                    this.advancedOptions.classList.toggle('active');
-                    this.toggleAdvanced.classList.toggle('active');
-                });
-            }
-
-            handleFileSelect(e) {
-                const file = e.target.files[0];
-                if (file) this.handleFile(file);
-            }
-
-            handleFile(file) {
-                if (!file.type.match('image.*')) {
-                    this.showStatus('تکایە تەنها فایلی وێنە هەڵبژێرە', 'error');
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        this.originalImage = img;
-                        this.setupCanvas(img);
-                        this.uploadSection.style.display = 'none';
-                        this.editorContainer.style.display = 'grid';
-                        this.saveToHistory();
-                        this.showStatus('وێنەکەت بە سەرکەوتوویی بارکرا', 'success');
-                    };
-                    img.onerror = () => {
-                        this.showStatus('هەڵە لە بارکردنی وێنە', 'error');
-                    };
-                    img.src = e.target.result;
-                };
-                reader.onerror = () => {
-                    this.showStatus('هەڵە لە خوێندنەوەی فایل', 'error');
-                };
-                reader.readAsDataURL(file);
-            }
-
-            setupCanvas(img) {
-                // Calculate dimensions to fit container while maintaining aspect ratio
-                const container = this.canvas.parentElement;
-                const maxWidth = container.clientWidth - 40;
-                const maxHeight = window.innerHeight * 0.7;
-                const ratio = Math.min(maxWidth / img.width, maxHeight / img.height);
-                
-                this.canvas.width = img.width * ratio;
-                this.canvas.height = img.height * ratio;
-                
-                // Draw image on canvas
-                this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
-                this.currentImage = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-            }
-
-            startSelection(e) {
-                if (!this.originalImage) return;
-                
-                this.isDrawing = true;
-                const pos = this.getMousePos(e);
-                this.selectionPoints = [pos];
-                this.lastKnownPosition = pos;
-                
-                // Clear any existing selection drawings
-                this.redrawImage();
-            }
-
-            drawSelection(e) {
-                if (!this.isDrawing || !this.originalImage) return;
-                const pos = this.getMousePos(e);
-                this.lastKnownPosition = pos;
-                
-                // Add point to selection
-                this.selectionPoints.push(pos);
-                
-                // Redraw image and selection
-                this.redrawImage();
-                this.drawSelectionOutline();
-                
-                // Update smart cursor position
-                this.updateSmartCursorPosition(e);
-            }
-
-            endSelection() {
-                if (!this.isDrawing) return;
-                this.isDrawing = false;
-                
-                if (this.selectionPoints.length > 2) {
-                    // Finalize the selection
-                    this.redrawImage();
-                    this.drawSelectionOutline(true);
-                    this.showStatus('ناوچەی هەڵبژاردن دیاریکرا', 'info');
-                }
-            }
-
-            redrawImage() {
-                // Clear canvas and redraw the original image
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                this.ctx.drawImage(this.originalImage, 0, 0, this.canvas.width, this.canvas.height);
-            }
-
-            drawSelectionOutline(fill = false) {
-                if (this.selectionPoints.length < 2) return;
-                
-                this.ctx.strokeStyle = 'rgba(255, 0, 0, 0.7)';
-                this.ctx.lineWidth = 2;
-                this.ctx.lineJoin = 'round';
-                this.ctx.lineCap = 'round';
-                this.ctx.beginPath();
-                
-                // Start from first point
-                this.ctx.moveTo(this.selectionPoints[0].x, this.selectionPoints[0].y);
-                
-                // Draw smooth curve through points
-                for (let i = 1; i < this.selectionPoints.length; i++) {
-                    const p1 = this.selectionPoints[i-1];
-                    const p2 = this.selectionPoints[i];
-                    const cpX = (p1.x + p2.x) / 2;
-                    const cpY = (p1.y + p2.y) / 2;
-                    this.ctx.quadraticCurveTo(cpX, cpY, p2.x, p2.y);
-                }
-                
-                // If filling, close the path and fill
-                if (fill) {
-                    this.ctx.closePath();
-                    this.ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-                    this.ctx.fill();
-                }
-                
-                this.ctx.stroke();
-            }
-
-            removeSelectedArea() {
-                if (!this.originalImage || this.selectionPoints.length < 3) {
-                    this.showStatus('هیچ ناوچەیەک دیارینەکراوە', 'warning');
-                    return;
-                }
-                
-                this.showStatus('سڕینەوەی ناوچە دیاریکراوەکان...', 'info');
-                this.progressContainer.style.display = 'block';
-                
-                // Use requestAnimationFrame for smooth progress updates
-                const startTime = performance.now();
-                const totalDuration = 1000; // 1 second for animation
-                
-                const animateRemoval = (timestamp) => {
-                    const elapsed = timestamp - startTime;
-                    const progress = Math.min(elapsed / totalDuration, 1);
-                    this.progressBar.style.width = `${progress * 100}%`;
-                    
-                    if (progress < 1) {
-                        requestAnimationFrame(animateRemoval);
-                    } else {
-                        // Apply the actual removal when animation completes
-                        this.applyContentAwareRemoval();
-                        this.saveToHistory();
-                        this.progressContainer.style.display = 'none';
-                        this.showStatus('ناوچە دیاریکراوەکان بە سەرکەوتوویی سڕایەوە', 'success');
-                    }
-                };
-                
-                requestAnimationFrame(animateRemoval);
-            }
-
-            applyContentAwareRemoval() {
-                // Get image data
-                const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-                const {data, width, height} = imageData;
-                
-                // Get bounding box of selection
-                let minX = width, minY = height, maxX = 0, maxY = 0;
-                this.selectionPoints.forEach(p => {
-                    minX = Math.min(minX, p.x);
-                    minY = Math.min(minY, p.y);
-                    maxX = Math.max(maxX, p.x);
-                    maxY = Math.max(maxY, p.y);
-                });
-                
-                // Determine sample size based on quality setting
-                let sampleSize;
-                switch(this.removalQualityValue) {
-                    case 'fast': sampleSize = 10; break;
-                    case 'balanced': sampleSize = 30; break;
-                    case 'high': sampleSize = 50; break;
-                    case 'best': sampleSize = 80; break;
-                    default: sampleSize = 30;
-                }
-                
-                // Sample surrounding pixels to determine fill color
-                const avgColor = this.getAverageColorAroundSelection(imageData, minX, minY, maxX, maxY, sampleSize);
-                
-                // Fill the selected area
-                for (let y = Math.max(0, minY); y < Math.min(height, maxY); y++) {
-                    for (let x = Math.max(0, minX); x < Math.min(width, maxX); x++) {
-                        if (this.isPointInSelection(x, y)) {
-                            const idx = (y * width + x) * 4;
-                            data[idx] = avgColor.r;
-                            data[idx + 1] = avgColor.g;
-                            data[idx + 2] = avgColor.b;
-                            data[idx + 3] = 255;
-                        }
-                    }
-                }
-                
-                // Apply blending based on blend mode
-                this.applyBlending(imageData, minX, minY, maxX, maxY);
-                
-                // Put the modified image data back to canvas
-                this.ctx.putImageData(imageData, 0, 0);
-                
-                // Clear selection points
-                this.selectionPoints = [];
-            }
-
-            getAverageColorAroundSelection(imageData, minX, minY, maxX, maxY, sampleSize) {
-                const {data, width, height} = imageData;
-                let r = 0, g = 0, b = 0, count = 0;
-                
-                // Sample above selection
-                for (let y = Math.max(0, minY - sampleSize); y < minY; y++) {
-                    for (let x = Math.max(0, minX - sampleSize); x < Math.min(width, maxX + sampleSize); x++) {
-                        if (!this.isPointInSelection(x, y)) {
-                            const idx = (y * width + x) * 4;
-                            r += data[idx];
-                            g += data[idx + 1];
-                            b += data[idx + 2];
-                            count++;
-                        }
-                    }
-                }
-                
-                // Sample below selection
-                for (let y = maxY; y < Math.min(height, maxY + sampleSize); y++) {
-                    for (let x = Math.max(0, minX - sampleSize); x < Math.min(width, maxX + sampleSize); x++) {
-                        if (!this.isPointInSelection(x, y)) {
-                            const idx = (y * width + x) * 4;
-                            r += data[idx];
-                            g += data[idx + 1];
-                            b += data[idx + 2];
-                            count++;
-                        }
-                    }
-                }
-                
-                // Sample left of selection
-                for (let x = Math.max(0, minX - sampleSize); x < minX; x++) {
-                    for (let y = minY; y < maxY; y++) {
-                        if (!this.isPointInSelection(x, y)) {
-                            const idx = (y * width + x) * 4;
-                            r += data[idx];
-                            g += data[idx + 1];
-                            b += data[idx + 2];
-                            count++;
-                        }
-                    }
-                }
-                
-                // Sample right of selection
-                for (let x = maxX; x < Math.min(width, maxX + sampleSize); x++) {
-                    for (let y = minY; y < maxY; y++) {
-                        if (!this.isPointInSelection(x, y)) {
-                            const idx = (y * width + x) * 4;
-                            r += data[idx];
-                            g += data[idx + 1];
-                            b += data[idx + 2];
-                            count++;
-                        }
-                    }
-                }
-                
-                // If no samples found, use fallback color
-                if (count === 0) {
-                    return { r: 240, g: 240, b: 240 };
-                }
-                
-                return {
-                    r: Math.round(r / count),
-                    g: Math.round(g / count),
-                    b: Math.round(b / count)
-                };
-            }
-
-            applyBlending(imageData, minX, minY, maxX, maxY) {
-                const {data, width, height} = imageData;
-                const blendWidth = Math.min(15, Math.min(width, height) / 10);
-                
-                for (let y = Math.max(0, minY - blendWidth); y < Math.min(height, maxY + blendWidth); y++) {
-                    for (let x = Math.max(0, minX - blendWidth); x < Math.min(width, maxX + blendWidth); x++) {
-                        if (this.isPointNearSelectionEdge(x, y, minX, minY, maxX, maxY, blendWidth)) {
-                            const idx = (y * width + x) * 4;
-                            
-                            // Sample surrounding pixels
-                            let r = 0, g = 0, b = 0, count = 0;
-                            for (let dy = -1; dy <= 1; dy++) {
-                                for (let dx = -1; dx <= 1; dx++) {
-                                    const nx = x + dx;
-                                    const ny = y + dy;
-                                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-                                        const nIdx = (ny * width + nx) * 4;
-                                        r += data[nIdx];
-                                        g += data[nIdx + 1];
-                                        b += data[nIdx + 2];
-                                        count++;
-                                    }
-                                }
-                            }
-                            
-                            // Calculate blend factor based on distance from edge
-                            const blendFactor = this.getBlendFactorForPixel(x, y, minX, minY, maxX, maxY, blendWidth);
-                            
-                            // Apply blending
-                            data[idx] = Math.round(data[idx] * (1 - blendFactor) + (r / count) * blendFactor);
-                            data[idx + 1] = Math.round(data[idx + 1] * (1 - blendFactor) + (g / count) * blendFactor);
-                            data[idx + 2] = Math.round(data[idx + 2] * (1 - blendFactor) + (b / count) * blendFactor);
-                        }
-                    }
-                }
-            }
-
-            isPointInSelection(x, y) {
-                // Simple point-in-polygon test for the selection
-                let inside = false;
-                for (let i = 0, j = this.selectionPoints.length - 1; i < this.selectionPoints.length; j = i++) {
-                    const xi = this.selectionPoints[i].x, yi = this.selectionPoints[i].y;
-                    const xj = this.selectionPoints[j].x, yj = this.selectionPoints[j].y;
-                    
-                    const intersect = ((yi > y) !== (yj > y))
-                        && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-                    if (intersect) inside = !inside;
-                }
-                
-                return inside;
-            }
-
-            isPointNearSelectionEdge(x, y, minX, minY, maxX, maxY, width) {
-                // Check if point is near the edge of the selection
-                return (x >= minX - width && x <= minX + width && y >= minY && y <= maxY) ||
-                       (x >= maxX - width && x <= maxX + width && y >= minY && y <= maxY) ||
-                       (y >= minY - width && y <= minY + width && x >= minX && x <= maxX) ||
-                       (y >= maxY - width && y <= maxY + width && x >= minX && x <= maxX);
-            }
-
-            getBlendFactorForPixel(x, y, minX, minY, maxX, maxY, width) {
-                // Calculate blend factor based on distance from edge
-                const distLeft = x - minX;
-                const distRight = maxX - x;
-                const distTop = y - minY;
-                const distBottom = maxY - y;
-                
-                const minDist = Math.min(distLeft, distRight, distTop, distBottom);
-                return Math.min(1, Math.max(0, minDist / width));
-            }
-
-            enhanceImage() {
-                if (!this.originalImage) {
-                    this.showStatus('هیچ وێنەیەک بارنەکراوە', 'warning');
-                    return;
-                }
-                
-                this.showStatus('باشترکردنی وێنە...', 'info');
-                this.progressContainer.style.display = 'block';
-                
-                // Simulate processing with animation
-                const startTime = performance.now();
-                const totalDuration = 1500; // 1.5 seconds for animation
-                
-                const animateEnhancement = (timestamp) => {
-                    const elapsed = timestamp - startTime;
-                    const progress = Math.min(elapsed / totalDuration, 1);
-                    this.progressBar.style.width = `${progress * 100}%`;
-                    
-                    if (progress < 1) {
-                        requestAnimationFrame(animateEnhancement);
-                    } else {
-                        // Apply the actual enhancement when animation completes
-                        this.applyEnhancementEffects();
-                        this.saveToHistory();
-                        this.progressContainer.style.display = 'none';
-                        this.showStatus('وێنەکە بە سەرکەوتوویی باشترکرایەوە', 'success');
-                    }
-                };
-                
-                requestAnimationFrame(animateEnhancement);
-            }
-
-            applyEnhancementEffects() {
-                const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-                const {data} = imageData;
-                
-                // Simple enhancement effects:
-                // 1. Adjust contrast
-                // 2. Sharpen edges
-                // 3. Reduce noise
-                
-                const contrast = 1.1;
-                const brightness = 1.05;
-                
-                for (let i = 0; i < data.length; i += 4) {
-                    // RGB channels
-                    for (let j = 0; j < 3; j++) {
-                        data[i + j] = Math.min(255, Math.max(0, 
-                            ((data[i + j] / 255 - 0.5) * contrast + 0.5) * 255 * brightness
-                        ));
-                    }
-                }
-                
-                this.ctx.putImageData(imageData, 0, 0);
-            }
-
-            saveToHistory() {
-                const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-                this.imageHistory.push(imageData);
-                
-                // Limit history size
-                if (this.imageHistory.length > 10) {
-                    this.imageHistory.shift();
-                }
-            }
-
-            undoAction() {
-                if (this.imageHistory.length > 1) {
-                    this.imageHistory.pop(); // Remove current state
-                    const previousState = this.imageHistory[this.imageHistory.length - 1];
-                    this.ctx.putImageData(previousState, 0, 0);
-                    this.showStatus('کردارەکە گەڕێندرایەوە', 'info');
-                } else {
-                    this.showStatus('هیچ مێژوویەک نییە بۆ گەڕاندنەوە', 'warning');
-                }
-                
-                // Clear selection points
-                this.selectionPoints = [];
-            }
-
-            downloadImage() {
-                if (!this.originalImage) {
-                    this.showStatus('هیچ وێنەیەک بارنەکراوە', 'warning');
-                    return;
-                }
-                
-                const link = document.createElement('a');
-                link.download = 'edited-image.png';
-                link.href = this.canvas.toDataURL('image/png');
-                link.click();
-                this.showStatus('وێنەکەت دابەزێنرا', 'success');
-            }
-
-            getMousePos(e) {
-                const rect = this.canvas.getBoundingClientRect();
-                return {
-                    x: (e.clientX - rect.left) * (this.canvas.width / rect.width),
-                    y: (e.clientY - rect.top) * (this.canvas.height / rect.height)
-                };
-            }
-
-            updateSmartCursorPosition(e) {
-                if (!this.originalImage) return;
-                
-                const pos = this.getMousePos(e);
-                this.smartCursor.style.left = `${e.clientX}px`;
-                this.smartCursor.style.top = `${e.clientY}px`;
-                this.smartCursor.style.display = 'block';
-                this.smartCursor.style.width = `${this.brushSizeValue}px`;
-                this.smartCursor.style.height = `${this.brushSizeValue}px`;
-            }
-
-            updateBrushPreview() {
-                this.brushPreview.style.setProperty('--brush-size', `${this.brushSizeValue}px`);
-            }
-
-            showStatus(message, type) {
-                this.statusMessage.textContent = message;
-                this.statusMessage.className = `status-message status-${type} fade-in`;
-                this.statusMessage.style.display = 'block';
-                
-                setTimeout(() => {
-                    this.statusMessage.classList.remove('fade-in');
-                    this.statusMessage.classList.add('fade-out');
-                    setTimeout(() => {
-                        this.statusMessage.style.display = 'none';
-                        this.statusMessage.classList.remove('fade-out');
-                    }, 500);
-                }, 3000);
-            }
-
-            handleTouchStart(e) {
-                e.preventDefault();
-                const touch = e.touches[0];
-                const mouseEvent = new MouseEvent('mousedown', {
-                    clientX: touch.clientX,
-                    clientY: touch.clientY
-                });
-                this.canvas.dispatchEvent(mouseEvent);
-            }
-
-            handleTouchMove(e) {
-                e.preventDefault();
-                const touch = e.touches[0];
-                const mouseEvent = new MouseEvent('mousemove', {
-                    clientX: touch.clientX,
-                    clientY: touch.clientY
-                });
-                this.canvas.dispatchEvent(mouseEvent);
-            }
-
-            handleTouchEnd() {
-                const mouseEvent = new MouseEvent('mouseup', {});
-                this.canvas.dispatchEvent(mouseEvent);
+                hideAILoading();
+                console.log("AI model loaded successfully");
+            } catch (error) {
+                hideAILoading();
+                console.error("Error loading AI model:", error);
+                alert("هەڵە لە بارکردنی مۆدێلی AI. تکایە دووبارە هەوڵبەرەوە.");
             }
         }
 
-        // Initialize the application when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            const imageEditor = new AdvancedImageEditor();
+        function showAILoading(message) {
+            isAILoading = true;
+            progressBar.style.display = 'block';
+            aiLoading.style.display = 'block';
+            if (message) {
+                aiLoading.querySelector('p').textContent = message;
+            }
+        }
+
+        function hideAILoading() {
+            isAILoading = false;
+            progressBar.style.display = 'none';
+            aiLoading.style.display = 'none';
+            progress.style.width = '0%';
+        }
+
+        function updateProgress(percent) {
+            progress.style.width = `${percent}%`;
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('تکایە فایلی وێنە هەڵبژێرە');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    originalImage = img;
+                    setupCanvas(img);
+                    uploadSection.style.display = 'none';
+                    editorContainer.style.display = 'grid';
+                    saveToHistory();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function setupCanvas(img) {
+            // Set canvas size to match image
+            canvas.width = img.width;
+            canvas.height = img.height;
             
-            // Add animation to header
-            const header = document.querySelector('.header h1');
-            header.style.animation = 'float 3s ease-in-out infinite';
-        });
+            // Draw image on main canvas
+            ctx.drawImage(img, 0, 0);
+            
+            // Create mask canvas
+            maskCanvas = document.createElement('canvas');
+            maskCanvas.width = img.width;
+            maskCanvas.height = img.height;
+            maskCtx = maskCanvas.getContext('2d');
+            
+            // Create custom cursor
+            createCustomCursor();
+        }
+
+        function updateBrushPreview() {
+            brushPreview.style.setProperty('--brush-size', brushSize + 'px');
+        }
+
+        function createCustomCursor() {
+            if (customCursor) {
+                customCursor.remove();
+            }
+            
+            customCursor = document.createElement('div');
+            customCursor.className = 'smart-brush-cursor';
+            customCursor.style.width = brushSize + 'px';
+            customCursor.style.height = brushSize + 'px';
+            customCursor.style.display = 'none';
+            document.body.appendChild(customCursor);
+        }
+
+        function updateCustomCursor() {
+            if (customCursor) {
+                customCursor.style.width = brushSize + 'px';
+                customCursor.style.height = brushSize + 'px';
+            }
+        }
+
+        function showCustomCursor() {
+            canvas.style.cursor = 'none';
+            if (customCursor) {
+                customCursor.style.display = 'block';
+            }
+        }
+
+        function hideCustomCursor() {
+            canvas.style.cursor = 'crosshair';
+            if (customCursor) {
+                customCursor.style.display = 'none';
+            }
+        }
+
+        function handleMouseMove(e) {
+            if (customCursor) {
+                customCursor.style.left = e.clientX + 'px';
+                customCursor.style.top = e.clientY + 'px';
+            }
+            
+            if (isDrawing) {
+                draw(e);
+            }
+        }
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            return {
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
+            };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getMousePos(e);
+            lastDrawPoint = pos;
+            drawMask(pos.x, pos.y);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getMousePos(e);
+            
+            if (smartMode && lastDrawPoint) {
+                // Smart drawing with interpolation
+                drawSmartLine(lastDrawPoint.x, lastDrawPoint.y, pos.x, pos.y);
+            } else {
+                drawMask(pos.x, pos.y);
+            }
+            
+            lastDrawPoint = pos;
+        }
+
+        function drawSmartLine(x1, y1, x2, y2) {
+            const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+            const steps = Math.max(1, Math.floor(distance / (brushSize / 4)));
+            
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const x = x1 + (x2 - x1) * t;
+                const y = y1 + (y2 - y1) * t;
+                drawMask(x, y);
+            }
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function drawMask(x, y) {
+            // Smart edge detection for better selection
+            if (smartMode) {
+                drawSmartMask(x, y);
+            } else {
+                drawBasicMask(x, y);
+            }
+
+            // Draw mask overlay on main canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(originalImage, 0, 0);
+            
+            // Apply glowing mask effect
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.shadowColor = 'rgba(102, 126, 234, 0.8)';
+            ctx.shadowBlur = 10;
+            ctx.drawImage(maskCanvas, 0, 0);
+            ctx.shadowBlur = 0;
+            ctx.globalCompositeOperation = 'source-over';
+        }
+
+        function drawBasicMask(x, y) {
+            maskCtx.globalCompositeOperation = 'source-over';
+            
+            // Create gradient brush for smoother edges
+            const gradient = maskCtx.createRadialGradient(x, y, 0, x, y, brushSize / 2);
+            gradient.addColorStop(0, 'rgba(255, 100, 100, 0.8)');
+            gradient.addColorStop(0.7, 'rgba(255, 100, 100, 0.6)');
+            gradient.addColorStop(1, 'rgba(255, 100, 100, 0.2)');
+            
+            maskCtx.fillStyle = gradient;
+            maskCtx.beginPath();
+            maskCtx.arc(x, y, brushSize / 2, 0, 2 * Math.PI);
+            maskCtx.fill();
+        }
+
+        function drawSmartMask(x, y) {
+            // Get surrounding pixel data for edge detection
+            const imageData = ctx.getImageData(Math.max(0, x - brushSize), 
+                                             Math.max(0, y - brushSize), 
+                                             Math.min(canvas.width, brushSize * 2), 
+                                             Math.min(canvas.height, brushSize * 2));
+            
+            // Smart brush that adapts to edges
+            const centerColor = getPixelColor(Math.floor(x), Math.floor(y));
+            
+            maskCtx.globalCompositeOperation = 'source-over';
+            
+            // Adaptive brush size based on edge detection
+            const adaptiveBrushSize = detectEdges(x, y) ? brushSize * 0.7 : brushSize;
+            
+            const gradient = maskCtx.createRadialGradient(x, y, 0, x, y, adaptiveBrushSize / 2);
+            gradient.addColorStop(0, 'rgba(255, 120, 120, 0.9)');
+            gradient.addColorStop(0.6, 'rgba(255, 120, 120, 0.7)');
+            gradient.addColorStop(1, 'rgba(255, 120, 120, 0.3)');
+            
+            maskCtx.fillStyle = gradient;
+            maskCtx.beginPath();
+            maskCtx.arc(x, y, adaptiveBrushSize / 2, 0, 2 * Math.PI);
+            maskCtx.fill();
+        }
+
+        function getPixelColor(x, y) {
+            if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) {
+                return { r: 0, g: 0, b: 0, a: 0 };
+            }
+            
+            const imageData = ctx.getImageData(x, y, 1, 1);
+            return {
+                r: imageData.data[0],
+                g: imageData.data[1],
+                b: imageData.data[2],
+                a: imageData.data[3]
+            };
+        }
+
+        function detectEdges(x, y) {
+            const centerColor = getPixelColor(Math.floor(x), Math.floor(y));
+            const threshold = 30;
+            
+            // Check surrounding pixels for significant color differences
+            for (let dx = -2; dx <= 2; dx++) {
+                for (let dy = -2; dy <= 2; dy++) {
+                    if (dx === 0 && dy === 0) continue;
+                    
+                    const neighborColor = getPixelColor(Math.floor(x + dx), Math.floor(y + dy));
+                    const colorDiff = Math.abs(centerColor.r - neighborColor.r) +
+                                    Math.abs(centerColor.g - neighborColor.g) +
+                                    Math.abs(centerColor.b - neighborColor.b);
+                    
+                    if (colorDiff > threshold) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        async function removeSelectedAreas() {
+            if (!maskCanvas) return;
+
+            saveToHistory();
+            showAILoading("AI کاردەکات لەسەر وێنەکە...");
+
+            try {
+                // Get the mask data
+                const maskData = maskCtx.getImageData(0, 0, canvas.width, canvas.height);
+                
+                // Use AI for better segmentation if available
+                let segmentation = null;
+                if (aiModel && smartMode) {
+                    segmentation = await aiModel.segmentPerson(canvas, {
+                        flipHorizontal: false,
+                        internalResolution: (aiPrecision > 70) ? 'high' : (aiPrecision > 40) ? 'medium' : 'low',
+                        segmentationThreshold: aiPrecision / 100
+                    });
+                    updateProgress(50);
+                }
+
+                // Create a temporary canvas for processing
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.drawImage(canvas, 0, 0);
+                
+                // Apply the removal with AI assistance
+                await applyAIInpainting(tempCtx, maskData, segmentation);
+                updateProgress(100);
+                
+                // Draw the result back to the main canvas
+                ctx.drawImage(tempCanvas, 0, 0);
+                
+                // Clear mask
+                maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+            } catch (error) {
+                console.error("Error in AI removal:", error);
+                alert("هەڵە لە کاتی سڕینەوە بە یارمەتی AI");
+            } finally {
+                hideAILoading();
+            }
+        }
+
+        async function applyAIInpainting(tempCtx, maskData, segmentation) {
+            return new Promise((resolve) => {
+                // Simulate processing with progress updates
+                const totalPixels = canvas.width * canvas.height;
+                const batchSize = Math.floor(totalPixels / 10);
+                
+                const imageData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
+                
+                for (let i = 0; i < totalPixels; i++) {
+                    const x = i % canvas.width;
+                    const y = Math.floor(i / canvas.width);
+                    const idx = i * 4;
+                    
+                    // Check if pixel should be removed (either manually selected or AI detected)
+                    const shouldRemove = (
+                        maskData.data[idx + 3] > 50 || 
+                        (segmentation && segmentation.data[i] > (0.7 * (aiPrecision / 100)))
+                    );
+                    
+                    if (shouldRemove) {
+                        const avgColor = getSmartAverageColor(imageData, x, y, maskData);
+                        
+                        imageData.data[idx] = avgColor.r;
+                        imageData.data[idx + 1] = avgColor.g;
+                        imageData.data[idx + 2] = avgColor.b;
+                    }
+                    
+                    // Update progress occasionally
+                    if (i % batchSize === 0) {
+                        const progress = Math.floor((i / totalPixels) * 100);
+                        updateProgress(50 + (progress / 2));
+                    }
+                }
+                
+                tempCtx.putImageData(imageData, 0, 0);
+                resolve();
+            });
+        }
+
+        function getSmartAverageColor(imageData, x, y, maskData) {
+            let r = 0, g = 0, b = 0, count = 0;
+            const radius = Math.max(brushSize, 25);
+            const precisionFactor = aiPrecision / 50; // Higher precision = more samples
+            
+            // Sample in a spiral pattern for better blending
+            for (let angle = 0; angle < Math.PI * 2 * precisionFactor; angle += 0.2) {
+                for (let dist = 5; dist <= radius; dist += 3) {
+                    const nx = Math.round(x + Math.cos(angle) * dist);
+                    const ny = Math.round(y + Math.sin(angle) * dist);
+                    
+                    if (nx >= 0 && nx < canvas.width && ny >= 0 && ny < canvas.height) {
+                        const idx = (ny * canvas.width + nx) * 4;
+                        
+                        // Check if this pixel is not masked
+                        if (maskData.data[idx + 3] < 50) {
+                            const weight = 1 / (1 + dist / 10); // Distance-based weighting
+                            r += imageData.data[idx] * weight;
+                            g += imageData.data[idx + 1] * weight;
+                            b += imageData.data[idx + 2] * weight;
+                            count += weight;
+                        }
+                    }
+                }
+            }
+
+            if (count === 0) {
+                // Fallback to nearby pixels if no samples found
+                return getFallbackColor(imageData, x, y);
+            }
+
+            return {
+                r: Math.round(r / count),
+                g: Math.round(g / count),
+                b: Math.round(b / count)
+            };
+        }
+
+        function getFallbackColor(imageData, x, y) {
+            // Simple fallback that looks at immediate neighbors
+            let r = 0, g = 0, b = 0, count = 0;
+            
+            for (let dx = -1; dx <= 1; dx++) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    
+                    if (nx >= 0 && nx < canvas.width && ny >= 0 && ny < canvas.height) {
+                        const idx = (ny * canvas.width + nx) * 4;
+                        r += imageData.data[idx];
+                        g += imageData.data[idx + 1];
+                        b += imageData.data[idx + 2];
+                        count++;
+                    }
+                }
+            }
+            
+            return {
+                r: count > 0 ? Math.round(r / count) : 240,
+                g: count > 0 ? Math.round(g / count) : 240,
+                b: count > 0 ? Math.round(b / count) : 240
+            };
+        }
+
+        async function enhanceWithAI() {
+            if (!originalImage || isAILoading) return;
+            
+            saveToHistory();
+            showAILoading("باشترکردنی وێنە بە یارمەتی AI...");
+            
+            try {
+                // Simulate AI enhancement (in a real app, you'd use actual AI processing)
+                for (let i = 0; i <= 100; i += 10) {
+                    updateProgress(i);
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+                // In a real implementation, you would:
+                // 1. Send the image to an AI enhancement API
+                // 2. Process the image with TensorFlow.js filters
+                // 3. Apply smart sharpening/denoising algorithms
+                
+                // For this demo, we'll just apply a simple filter
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                applyEnhancementFilter(imageData.data);
+                ctx.putImageData(imageData, 0, 0);
+                
+                updateProgress(100);
+                alert("وێنەکەت بە سەرکەوتوویی باشترکرایەوە بە یارمەتی AI!");
+            } catch (error) {
+                console.error("Error in AI enhancement:", error);
+                alert("هەڵە لە باشترکردنی وێنە بە یارمەتی AI");
+            } finally {
+                hideAILoading();
+            }
+        }
+
+        function applyEnhancementFilter(data) {
+            // Simple contrast and brightness adjustment
+            const contrast = 1.1;
+            const brightness = 1.05;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                // RGB channels
+                for (let j = 0; j < 3; j++) {
+                    data[i + j] = Math.min(255, Math.max(0, 
+                        ((data[i + j] / 255 - 0.5) * contrast + 0.5) * 255 * brightness
+                    ));
+                }
+            }
+        }
+
+        function saveToHistory() {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            imageHistory.push(imageData);
+            
+            // Keep only last 10 states
+            if (imageHistory.length > 10) {
+                imageHistory.shift();
+            }
+        }
+
+        function undo() {
+            if (imageHistory.length > 1) {
+                imageHistory.pop(); // Remove current state
+                const previousState = imageHistory[imageHistory.length - 1];
+                ctx.putImageData(previousState, 0, 0);
+                
+                // Clear mask
+                if (maskCtx) {
+                    maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+                }
+            }
+        }
+
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'edited-image.png';
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+        }
     </script>
 </body>
 </html>
