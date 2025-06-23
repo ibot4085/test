@@ -3,6 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- لە بەشی head زیاترەکانی زیاد بکە -->
+<script async src="https://docs.opencv.org/4.5.5/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+
+<!-- لە بەشی script گۆڕانکارییەکان -->
+<script>
+    let cvReady = false;
+    
+    function onOpenCvReady() {
+        cvReady = true;
+        console.log('OpenCV.js بارکرا بە سەرکەوتوویی');
+    }
+
+    // گۆڕانی فەنکشنی removeSelectedAreas
+    async function removeSelectedAreas() {
+        if (!maskCanvas) return;
+
+        saveToHistory();
+        showAILoading("AI کاردەکات لەسەر وێنەکە...");
+
+        try {
+            // بەکارهێنانی OpenCV بۆ سڕینەوەی باشتر
+            if (cvReady) {
+                await removeWithOpenCV();
+            } else {
+                // بەکارهێنانی تەکنیکی پێشوو ئەگەر OpenCV بارنەکرابێت
+                await removeWithTF();
+            }
+            
+            updateProgress(100);
+        } catch (error) {
+            console.error("هەڵە لە سڕینەوە:", error);
+            alert("هەڵە لە کاتی سڕینەوە بە یارمەتی AI");
+        } finally {
+            hideAILoading();
+        }
+    }
+
+    async function removeWithOpenCV() {
+        return new Promise((resolve) => {
+            // گۆڕینی وێنە بۆ OpenCV Mat
+            const img = cv.imread(canvas);
+            const mask = cv.imread(maskCanvas);
+            
+            // دروستکردنی ماسکی ڕەنگ خاکەری
+            const grayMask = new cv.Mat();
+            cv.cvtColor(mask, grayMask, cv.COLOR_RGBA2GRAY);
+            
+            // دروستکردنی ماسکی باینەری
+            const binaryMask = new cv.Mat();
+            cv.threshold(grayMask, binaryMask, 10, 255, cv.THRESH_BINARY);
+            
+            // سڕینەوەی بە تەکنیکی inpainting
+            const result = new cv.Mat();
+            cv.inpaint(img, binaryMask, result, 3, cv.INPAINT_TELEA);
+            
+            // گەڕاندنەوەی ئەنجامەکە بۆ کەنڤاس
+            cv.imshow(canvas, result);
+            
+            // پاککردنەوەی سەرچاوەکان
+            img.delete();
+            mask.delete();
+            grayMask.delete();
+            binaryMask.delete();
+            result.delete();
+            
+            resolve();
+        });
+    }
+
+    async function removeWithTF() {
+        // کۆدی پێشوو بەکاربهێنە ئەگەر OpenCV بارنەکرابێت
+        const maskData = maskCtx.getImageData(0, 0, canvas.width, canvas.height);
+        let segmentation = null;
+        
+        if (aiModel && smartMode) {
+            segmentation = await aiModel.segmentPerson(canvas, {
+                flipHorizontal: false,
+                internalResolution: (aiPrecision > 70) ? 'high' : (aiPrecision > 40) ? 'medium' : 'low',
+                segmentationThreshold: aiPrecision / 100
+            });
+            updateProgress(50);
+        }
+
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(canvas, 0, 0);
+        
+        await applyAIInpainting(tempCtx, maskData, segmentation);
+        ctx.drawImage(tempCanvas, 0, 0);
+        maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+    }
+
+    // باشترکردنی فەنکشنی enhanceWithAI
+    async function enhanceWithAI() {
+        if (!originalImage || isAILoading) return;
+        
+        saveToHistory();
+        showAILoading("باشترکردنی وێنە بە یارمەتی AI...");
+        
+        try {
+            if (cvReady) {
+                await enhanceWithOpenCV();
+            } else {
+                await enhanceWithBasic();
+            }
+            
+            updateProgress(100);
+            alert("وێنەکەت بە سەرکەوتوویی باشترکرایەوە بە یارمەتی AI!");
+        } catch (error) {
+            console.error("هەڵە لە باشترکردن:", error);
+            alert("هەڵە لە باشترکردنی وێنە بە یارمەتی AI");
+        } finally {
+            hideAILoading();
+        }
+    }
+
+    async function enhanceWithOpenCV() {
+        return new Promise((resolve) => {
+            const img = cv.imread(canvas);
+            
+            // ڕەش و سپی کردنی وێنە بۆ دۆزینەوەی لێوارەکان
+            const gray = new cv.Mat();
+            cv.cvtColor(img, gray, cv.COLOR_RGBA2GRAY);
+            
+            // باشترکردنی لێوارەکان
+            const edges = new cv.Mat();
+            cv.Canny(gray, edges, 50, 150);
+            
+            // زیادکردنی تیزی بۆ وێنەکە
+            const sharpened = new cv.Mat();
+            cv.GaussianBlur(img, sharpened, new cv.Size(0, 0), 3);
+            cv.addWeighted(img, 1.5, sharpened, -0.5, 0, sharpened);
+            
+            // زیادکردنی ڕووناکی و کۆنتراست
+            const lab = new cv.Mat();
+            cv.cvtColor(sharpened, lab, cv.COLOR_RGBA2RGB);
+            cv.cvtColor(lab, lab, cv.COLOR_RGB2Lab);
+            
+            const labPlanes = new cv.MatVector();
+            cv.split(lab, labPlanes);
+            
+            const clahe = cv.createCLAHE(2.0, new cv.Size(8, 8));
+            clahe.apply(labPlanes.get(0), labPlanes.get(0));
+            
+            cv.merge(labPlanes, lab);
+            cv.cvtColor(lab, lab, cv.COLOR_Lab2RGB);
+            cv.cvtColor(lab, lab, cv.COLOR_RGB2RGBA);
+            
+            // نیشاندانی ئەنجامەکە
+            cv.imshow(canvas, lab);
+            
+            // پاککردنەوەی سەرچاوەکان
+            img.delete();
+            gray.delete();
+            edges.delete();
+            sharpened.delete();
+            lab.delete();
+            labPlanes.delete();
+            clahe.delete();
+            
+            resolve();
+        });
+    }
+
+    async function enhanceWithBasic() {
+        // کۆدی پێشوو بەکاربهێنە ئەگەر OpenCV بارنەکرابێت
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        applyEnhancementFilter(imageData.data);
+        ctx.putImageData(imageData, 0, 0);
+    }
+</script>
     <title>سڕینەوەی زیرەکی شت لە وێنە</title>
     <!-- TensorFlow.js and BodyPix for AI capabilities -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
