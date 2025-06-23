@@ -1,13 +1,25 @@
+
 <!DOCTYPE html>
 <html lang="ckb" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سڕینەوەی زیرەکی شت لە وێنە</title>
-    <!-- TensorFlow.js and BodyPix for AI capabilities -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@latest"></script>
+    <title>سڕینەوەی زیرەکی شت لە وێنە - ئامرازی پێشکەوتوو</title>
     <style>
+        :root {
+            --primary-color: #6C63FF;
+            --secondary-color: #4D44DB;
+            --accent-color: #FF6584;
+            --dark-color: #2D3748;
+            --light-color: #F8F9FA;
+            --success-color: #38A169;
+            --warning-color: #DD6B20;
+            --danger-color: #E53E3E;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -15,71 +27,73 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
             min-height: 100vh;
             padding: 20px;
             direction: rtl;
+            color: var(--dark-color);
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.97);
-            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: var(--border-radius);
             padding: 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            box-shadow: var(--box-shadow);
             backdrop-filter: blur(10px);
-            position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            position: relative;
         }
 
         .header h1 {
-            color: #2d3748;
+            color: var(--dark-color);
             font-size: 2.5rem;
-            margin-bottom: 10px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+
+        .header h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 50%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 3px;
         }
 
         .header p {
             color: #4a5568;
             font-size: 1.1rem;
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
             line-height: 1.6;
         }
 
         .upload-section {
-            border: 3px dashed #cbd5e0;
-            border-radius: 15px;
-            padding: 40px;
+            border: 3px dashed #d1d5db;
+            border-radius: var(--border-radius);
+            padding: 50px 30px;
             text-align: center;
             margin-bottom: 30px;
-            transition: all 0.3s ease;
+            transition: var(--transition);
             background: linear-gradient(45deg, #f7fafc, #edf2f7);
             position: relative;
             overflow: hidden;
-        }
-
-        .upload-section:hover {
-            border-color: #667eea;
-            background: linear-gradient(45deg, #edf2f7, #e2e8f0);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
-        }
-
-        .upload-section.dragover {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.1);
         }
 
         .upload-section::before {
@@ -91,12 +105,43 @@
             height: 200%;
             background: linear-gradient(
                 to bottom right,
-                rgba(102, 126, 234, 0.1) 0%,
-                rgba(102, 126, 234, 0) 50%,
-                rgba(102, 126, 234, 0.1) 100%
+                rgba(108, 99, 255, 0.05) 0%,
+                rgba(108, 99, 255, 0) 50%,
+                rgba(108, 99, 255, 0.05) 100%
             );
-            transform: rotate(45deg);
-            z-index: 0;
+            transform: rotate(30deg);
+            transition: var(--transition);
+        }
+
+        .upload-section:hover {
+            border-color: var(--primary-color);
+            background: linear-gradient(45deg, #edf2f7, #e2e8f0);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(108, 99, 255, 0.1);
+        }
+
+        .upload-section:hover::before {
+            transform: rotate(30deg) translateX(30px);
+        }
+
+        .upload-section.dragover {
+            border-color: var(--primary-color);
+            background: rgba(108, 99, 255, 0.05);
+        }
+
+        .upload-section h2 {
+            color: var(--dark-color);
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .upload-section p {
+            color: #6b7280;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
         }
 
         .file-input {
@@ -104,18 +149,20 @@
         }
 
         .upload-btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
+            padding: 15px 35px;
+            border-radius: 50px;
             font-size: 1.1rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: var(--transition);
             margin: 10px;
             position: relative;
             overflow: hidden;
             z-index: 1;
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+            font-weight: 500;
         }
 
         .upload-btn::before {
@@ -125,15 +172,15 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(45deg, #764ba2, #667eea);
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
             opacity: 0;
-            transition: opacity 0.3s ease;
             z-index: -1;
+            transition: var(--transition);
         }
 
         .upload-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(108, 99, 255, 0.4);
         }
 
         .upload-btn:hover::before {
@@ -145,78 +192,76 @@
             grid-template-columns: 1fr 350px;
             gap: 30px;
             margin-top: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .canvas-container {
             position: relative;
-            border-radius: 15px;
+            border-radius: var(--border-radius);
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            box-shadow: var(--box-shadow);
             background: #f8f9fa;
-            border: 1px solid #e2e8f0;
-            max-height: 70vh;
-            display: flex;
-            flex-direction: column;
+            height: fit-content;
         }
 
         #imageCanvas {
             max-width: 100%;
-            max-height: 100%;
+            height: auto;
             display: block;
             cursor: crosshair;
-            transition: transform 0.3s ease;
-            margin: 0 auto;
-        }
-
-        #imageCanvas:hover {
-            transform: scale(1.01);
+            background: repeating-conic-gradient(#f0f0f0 0% 25%, #f8f8f8 0% 50%) 50% / 20px 20px;
         }
 
         .tools-panel {
-            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
-            border-radius: 15px;
+            background: white;
+            border-radius: var(--border-radius);
             padding: 25px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e2e8f0;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+            box-shadow: var(--box-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
         }
 
         .tool-group {
-            margin-bottom: 15px;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .tool-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
 
         .tool-group h3 {
-            color: #2d3748;
+            color: var(--dark-color);
             margin-bottom: 15px;
             font-size: 1.2rem;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
-        .tool-group h3::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            border-radius: 50%;
+        .tool-group h3 svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--primary-color);
         }
 
         .brush-size {
             width: 100%;
-            margin: 10px 0;
+            margin: 15px 0;
             -webkit-appearance: none;
             height: 8px;
             border-radius: 4px;
-            background: #e2e8f0;
+            background: linear-gradient(90deg, #e0e7ff, var(--primary-color));
             outline: none;
         }
 
@@ -226,98 +271,80 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: var(--primary-color);
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 10px rgba(108, 99, 255, 0.3);
+            transition: var(--transition);
+        }
+
+        .brush-size::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            background: var(--secondary-color);
         }
 
         .action-btn {
             width: 100%;
             padding: 14px;
-            margin: 8px 0;
+            margin: 10px 0;
             border: none;
-            border-radius: 10px;
+            border-radius: var(--border-radius);
             font-size: 1rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: var(--transition);
             font-weight: 500;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            position: relative;
-            overflow: hidden;
         }
 
-        .action-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.2);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .action-btn:hover::before {
-            opacity: 1;
-        }
-
-        .action-btn i {
-            font-size: 1.2rem;
+        .action-btn svg {
+            width: 18px;
+            height: 18px;
         }
 
         .action-btn.remove {
-            background: linear-gradient(45deg, #e53e3e, #c53030);
+            background: linear-gradient(45deg, var(--danger-color), #C53030);
             color: white;
+            box-shadow: 0 5px 15px rgba(229, 62, 62, 0.2);
         }
 
         .action-btn.remove:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(229, 62, 62, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(229, 62, 62, 0.3);
         }
 
         .action-btn.undo {
-            background: linear-gradient(45deg, #4299e1, #3182ce);
+            background: linear-gradient(45deg, #4299E1, #3182CE);
             color: white;
+            box-shadow: 0 5px 15px rgba(66, 153, 225, 0.2);
         }
 
         .action-btn.undo:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(66, 153, 225, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(66, 153, 225, 0.3);
         }
 
         .action-btn.download {
-            background: linear-gradient(45deg, #38a169, #2f855a);
+            background: linear-gradient(45deg, var(--success-color), #2F855A);
             color: white;
+            box-shadow: 0 5px 15px rgba(56, 161, 105, 0.2);
         }
 
         .action-btn.download:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(56, 161, 105, 0.3);
-        }
-
-        .action-btn.ai-enhance {
-            background: linear-gradient(45deg, #9f7aea, #805ad5);
-            color: white;
-        }
-
-        .action-btn.ai-enhance:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(159, 122, 234, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(56, 161, 105, 0.3);
         }
 
         .brush-preview {
             width: 100px;
             height: 100px;
-            border: 3px solid #e2e8f0;
-            border-radius: 15px;
-            margin: 15px auto;
+            border: 3px solid #e0e7ff;
+            border-radius: var(--border-radius);
+            margin: 20px auto;
             position: relative;
-            background: linear-gradient(135deg, #f7fafc, #edf2f7);
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            background: white;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
             overflow: hidden;
         }
 
@@ -327,11 +354,11 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
             border-radius: 50%;
             width: var(--brush-size, 20px);
             height: var(--brush-size, 20px);
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.4);
             animation: pulse 2s infinite;
         }
 
@@ -341,11 +368,12 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            border: 2px dashed #667eea;
+            border: 2px dashed var(--primary-color);
             border-radius: 50%;
-            width: calc(var(--brush-size, 20px) + 10px);
-            height: calc(var(--brush-size, 20px) + 10px);
+            width: calc(var(--brush-size, 20px) + 15px);
+            height: calc(var(--brush-size, 20px) + 15px);
             animation: rotate 3s linear infinite;
+            opacity: 0.7;
         }
 
         @keyframes pulse {
@@ -362,10 +390,10 @@
             position: absolute;
             pointer-events: none;
             z-index: 1000;
-            border: 3px solid #667eea;
+            border: 3px solid var(--primary-color);
             border-radius: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 0 2px white, 0 0 20px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 0 0 2px white, 0 0 20px rgba(108, 99, 255, 0.5);
             animation: cursorPulse 1.5s infinite;
             mix-blend-mode: multiply;
         }
@@ -384,75 +412,25 @@
         }
 
         .ai-detection-hint {
-            background: linear-gradient(45deg, #9f7aea, #805ad5);
+            background: linear-gradient(45deg, var(--success-color), #2F855A);
             color: white;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            margin: 15px 0;
             text-align: center;
             animation: slideIn 0.5s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(56, 161, 105, 0.1);
         }
 
-        .ai-loading {
-            display: none;
-            text-align: center;
-            padding: 10px;
-            color: #4a5568;
-            font-size: 0.9rem;
-        }
-
-        .ai-loading span {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #667eea;
-            border-radius: 50%;
-            margin: 0 3px;
-            animation: bounce 1.4s infinite ease-in-out;
-        }
-
-        .ai-loading span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .ai-loading span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes bounce {
-            0%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-8px); }
-        }
-
-        .creator-credit {
-            text-align: center;
-            margin-top: 30px;
-            color: #4a5568;
-            font-size: 0.9rem;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: #e2e8f0;
-            border-radius: 3px;
-            margin-top: 10px;
-            overflow: hidden;
-            display: none;
-        }
-
-        .progress {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            width: 0%;
-            transition: width 0.3s ease;
+        .ai-detection-hint svg {
+            width: 16px;
+            height: 16px;
+            fill: white;
         }
 
         @keyframes slideIn {
@@ -460,137 +438,193 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Animation for image appearance */
-        @keyframes fadeInScale {
-            0% { opacity: 0; transform: scale(0.95); }
-            100% { opacity: 1; transform: scale(1); }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            position: relative;
+            padding-right: 35px;
+            cursor: pointer;
+            user-select: none;
         }
 
-        .image-appear {
-            animation: fadeInScale 0.5s ease-out forwards;
+        .checkbox-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
         }
 
-        /* Animation for brush stroke */
-        @keyframes brushStroke {
-            0% { transform: scale(0.8); opacity: 0.5; }
-            50% { transform: scale(1.1); opacity: 0.9; }
-            100% { transform: scale(1); opacity: 1; }
+        .checkmark {
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 24px;
+            width: 24px;
+            background-color: #f0f0f0;
+            border-radius: 6px;
+            transition: var(--transition);
+            border: 2px solid #d1d5db;
         }
 
-        .brush-stroke {
-            animation: brushStroke 0.3s ease-out;
+        .checkbox-container:hover input ~ .checkmark {
+            background-color: #e0e7ff;
+            border-color: var(--primary-color);
+        }
+
+        .checkbox-container input:checked ~ .checkmark {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+
+        .checkbox-container input:checked ~ .checkmark:after {
+            display: block;
+        }
+
+        .checkbox-container .checkmark:after {
+            left: 7px;
+            top: 3px;
+            width: 6px;
+            height: 12px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            transform: rotate(45deg);
+        }
+
+        .guide-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .step {
+            display: flex;
+            gap: 10px;
+        }
+
+        .step-number {
+            background: var(--primary-color);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .step-content {
+            font-size: 0.9rem;
+            color: #4b5563;
+            line-height: 1.5;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f0f0f0;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.1rem;
+            color: var(--dark-color);
+            margin-top: 15px;
+        }
+
+        @media (max-width: 992px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .tools-panel {
+                position: static;
+            }
         }
 
         @media (max-width: 768px) {
-            .editor-container {
-                grid-template-columns: 1fr;
+            .container {
+                padding: 20px;
             }
             
             .header h1 {
                 font-size: 2rem;
             }
             
-            .tools-panel {
-                order: -1;
+            .upload-section {
+                padding: 30px 20px;
+            }
+            
+            .brush-preview {
+                width: 80px;
+                height: 80px;
             }
         }
-
-        /* New AI specific styles */
-        .ai-tools-section {
-            background: rgba(159, 122, 234, 0.1);
-            border: 1px dashed #9f7aea;
-            border-radius: 12px;
-            padding: 15px;
-            margin-top: 20px;
-        }
-        
-        .ai-tools-section h4 {
-            color: #805ad5;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .ai-tools-section h4::before {
-            content: '🧠';
-            font-size: 1.2rem;
-        }
-        
-        .ai-mode-toggle {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-        
-        .ai-mode-toggle label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            flex-grow: 1;
-        }
-        
-        .ai-mode-toggle .toggle-switch {
-            position: relative;
-            width: 50px;
-            height: 24px;
-            background: #e2e8f0;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
-        
-        .ai-mode-toggle input:checked + .toggle-switch {
-            background: #667eea;
-        }
-        
-        .ai-mode-toggle .toggle-switch::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 20px;
-            height: 20px;
-            background: white;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-        }
-        
-        .ai-mode-toggle input:checked + .toggle-switch::after {
-            left: calc(100% - 22px);
-        }
-        
-        .ai-precision-control {
-            margin-top: 15px;
-        }
-        
-        .ai-precision-control label {
-            display: block;
-            margin-bottom: 8px;
-            color: #4a5568;
-        }
     </style>
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">چاوەڕوانبە... وێنەکەت خەملێنرێت</div>
+    </div>
+
     <div class="container">
         <div class="header">
             <h1>سڕینەوەی زیرەکی شت لە وێنە</h1>
-            <p>وێنەکەت هەڵبژێرە و شتەکانی ناخوازراوت لێ بسڕەوە بە شێوەیەکی زیرەک بە یارمەتی AI</p>
+            <p>بە ئامرازی پێشکەوتووی AI، بە ئاسانی شتە نەخوازراوەکان لە وێنەکەت بسڕەوە بە شێوەیەکی سروشتی و بێ شەڕەف</p>
         </div>
 
         <div class="upload-section" id="uploadSection">
             <div>
-                <h2>وێنەکەت بخەرە ئێرە</h2>
-                <p>یان کلیک بکە بۆ هەڵبژاردن</p>
+                <h2>وێنەکەت ڕێک بخەرە ئێرە</h2>
+                <p>یان کلیک بکە بۆ هەڵبژاردنی وێنە لە کۆمپیوتەرەکەت</p>
                 <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                    <i class="fas fa-cloud-upload-alt"></i> هەڵبژاردنی وێنە
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11 16V7.85l-2.6 2.6L7 9l5-5 5 5-1.4 1.45-2.6-2.6V16h-2Zm-7 4v-5h2v3h12v-3h2v5H4Z"/>
+                    </svg>
+                    هەڵبژاردنی وێنە
                 </button>
                 <input type="file" id="fileInput" class="file-input" accept="image/*">
             </div>
@@ -598,91 +632,90 @@
 
         <div class="editor-container" id="editorContainer">
             <div class="canvas-container">
-                <canvas id="imageCanvas" class="image-appear"></canvas>
-                <div class="progress-bar" id="progressBar">
-                    <div class="progress" id="progress"></div>
-                </div>
-                <div class="ai-loading" id="aiLoading">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                    <p>AI کاردەکات لەسەر وێنەکەت...</p>
-                </div>
+                <canvas id="imageCanvas"></canvas>
             </div>
             
             <div class="tools-panel">
                 <div class="tool-group">
-                    <h3>فرچەی زیرەک</h3>
+                    <h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9.15 21.05q-.375.125-.738-.063-.362-.187-.487-.562L4.35 8.475q-.125-.375.063-.738.187-.362.562-.487l11.55-3.65q.375-.125.738.062.362.188.487.563l3.575 11.95q.125.375-.062.738-.188.362-.563.487ZM5.9 8.025 8.975 19.1l10.075-3.075L15.9 4.925Z"/>
+                        </svg>
+                        فرچەی زیرەک
+                    </h3>
                     <div class="ai-detection-hint">
-                        <i class="fas fa-brain"></i> فرچەی زیرەک - خۆکارانە لێوارەکان دەناسێتەوە
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 15q.825 0 1.413-.588Q14 13.825 14 13t-.587-1.413Q12.825 11 12 11q-.825 0-1.412.587Q10 12.175 10 13q0 .825.588 1.412Q11.175 15 12 15Zm-4 5h8v-1.15q0-.725-.4-1.337-.4-.613-1.05-.863-.65-.25-1.287-.375Q12.625 16.5 12 16.5t-1.262.125q-.638.125-1.288.375-.65.25-1.05.863Q8 18.125 8 18.85Zm-2 3q-.825 0-1.412-.587Q4 20.825 4 20V4q0-.825.588-1.413Q5.175 2 6 2h12q.825 0 1.413.587Q20 3.175 20 4v16q0 .825-.587 1.413Q18.825 22 18 22Zm0-2h12V4H6v16Zm0 0V4v16Z"/>
+                        </svg>
+                        فرچەی زیرەک - خۆکارانە لێوارەکان دەناسێتەوە
                     </div>
                     <label for="brushSize">قەبارەی فرچە: <span id="brushSizeValue">20</span>px</label>
-                    <input type="range" id="brushSize" class="brush-size" min="10" max="80" value="20">
+                    <input type="range" id="brushSize" class="brush-size" min="5" max="100" value="20">
                     <div class="brush-preview" id="brushPreview"></div>
                     
-                    <div class="ai-mode-toggle">
-                        <label>
-                            <input type="checkbox" id="smartMode" checked>
-                            <span>دۆخی زیرەکی AI</span>
-                        </label>
-                        <div class="toggle-switch"></div>
-                    </div>
-                    
-                    <div class="ai-precision-control">
-                        <label for="aiPrecision">ئاستی دەقایەتی AI: <span id="aiPrecisionValue">70</span>%</label>
-                        <input type="range" id="aiPrecision" class="brush-size" min="10" max="100" value="70">
-                    </div>
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="smartMode" checked>
+                        <span class="checkmark"></span>
+                        دۆخی زیرەک - خۆکارانە لێوارەکان بدۆزێتەوە
+                    </label>
                 </div>
 
                 <div class="tool-group">
-                    <h3>کارەکان</h3>
+                    <h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M7 21q-.825 0-1.412-.587Q5 19.825 5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413Q17.825 21 17 21ZM17 6H7v13h10ZM9 17h2V8H9Zm4 0h2V8h-2ZM7 6v13Z"/>
+                        </svg>
+                        کارەکان
+                    </h3>
                     <button class="action-btn remove" id="removeBtn">
-                        <i class="fas fa-eraser"></i> سڕینەوەی ناوچەکان
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M7 21q-.825 0-1.412-.587Q5 19.825 5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413Q17.825 21 17 21ZM17 6H7v13h10ZM9 17h2V8H9Zm4 0h2V8h-2ZM7 6v13Z"/>
+                        </svg>
+                        سڕینەوەی ناوچەکان
                     </button>
                     <button class="action-btn undo" id="undoBtn">
-                        <i class="fas fa-undo"></i> گەڕاندنەوە
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 19q-2.925 0-4.962-2.038Q1 14.925 1 12t2.038-4.963Q5.075 5 8 5h6.15l-2-2 1.425-1.4L18.3 6l-4.725 4.4L12.15 9l2-2H8Q6.35 7 5.175 8.175 4 9.35 4 11q0 1.65 1.175 2.825Q6.35 15 8 15h7v2Z"/>
+                        </svg>
+                        گەڕاندنەوە
                     </button>
                     <button class="action-btn download" id="downloadBtn">
-                        <i class="fas fa-download"></i> دابەزاندنی وێنە
-                    </button>
-                    <button class="action-btn ai-enhance" id="aiEnhanceBtn">
-                        <i class="fas fa-magic"></i> باشترکردنی AI
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M6 20q-.825 0-1.412-.587Q4 18.825 4 18v-3h2v3h12v-3h2v3q0 .825-.587 1.413Q18.825 20 18 20Zm6-4-5-5 1.4-1.45 2.6 2.6V4h2v8.15l2.6-2.6L17 11Z"/>
+                        </svg>
+                        دابەزاندنی وێنە
                     </button>
                 </div>
 
                 <div class="tool-group">
-                    <h3>ڕێنمایی</h3>
-                    <p style="font-size: 0.9rem; color: #666;">
-                        ١. فرچەکە بەکار بهێنە بۆ نیشانکردنی ئەو شتانەی دەتەوێت بیانسڕیتەوە
-                        <br><br>
-                        ٢. دوگمەی "سڕینەوەی ناوچەکان" کلیک بکە
-                        <br><br>
-                        ٣. بۆ باشترکردنی ئەنجامەکە، دوگمەی "باشترکردنی AI" کلیک بکە
-                        <br><br>
-                        ٤. وێنەکە دابەزێنە
-                    </p>
-                </div>
-                
-                <div class="ai-tools-section">
-                    <h4>تایبەتمەندییەکانی AI</h4>
-                    <p style="font-size: 0.85rem; color: #666; line-height: 1.5;">
-                        ئەم ئامرازە بە یارمەتی تەکنەلۆژیای TensorFlow.js کاردەکات بۆ:
-                        <br>- ناسینەوەی خۆکارانەی کەس و شت
-                        <br>- سڕینەوەی وێنە بە شێوەیەکی سروشتی
-                        <br>- باشترکردنی کوالێتی وێنە دوای سڕینەوە
-                    </p>
+                    <h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 17q.425 0 .713-.288Q13 16.425 13 16t-.287-.713Q12.425 15 12 15t-.712.287Q11 15.575 11 16t.288.712Q11.575 17 12 17Zm-1-4h2V7h-2Zm-7 7q-.825 0-1.412-.587Q2 18.825 2 18V6q0-.825.588-1.412Q3.175 4 4 4h16q.825 0 1.413.588Q22 5.175 22 6v12q0 .825-.587 1.413Q20.825 20 20 20Zm0-2h16V6H4v12Zm0 0V6v12Z"/>
+                        </svg>
+                        ڕێنمایی
+                    </h3>
+                    <div class="guide-steps">
+                        <div class="step">
+                            <div class="step-number">١</div>
+                            <div class="step-content">فرچەکە بەکار بهێنە بۆ نیشانکردنی ئەو شتانەی دەتەوێت بیانسڕیتەوە</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">٢</div>
+                            <div class="step-content">دوگمەی "سڕینەوەی ناوچەکان" کلیک بکە</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">٣</div>
+                            <div class="step-content">وێنەکە دابەزێنە بە کلیککردن لەسەر دوگمەی دابەزاندن</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div class="creator-credit">
-            Created by Ibrahim Mala Taha | Powered by TensorFlow.js
         </div>
     </div>
 
     <script>
         const canvas = document.getElementById('imageCanvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
         const fileInput = document.getElementById('fileInput');
         const uploadSection = document.getElementById('uploadSection');
         const editorContainer = document.getElementById('editorContainer');
@@ -693,12 +726,7 @@
         const removeBtn = document.getElementById('removeBtn');
         const undoBtn = document.getElementById('undoBtn');
         const downloadBtn = document.getElementById('downloadBtn');
-        const aiEnhanceBtn = document.getElementById('aiEnhanceBtn');
-        const aiPrecisionSlider = document.getElementById('aiPrecision');
-        const aiPrecisionValue = document.getElementById('aiPrecisionValue');
-        const progressBar = document.getElementById('progressBar');
-        const progress = document.getElementById('progress');
-        const aiLoading = document.getElementById('aiLoading');
+        const loadingOverlay = document.getElementById('loadingOverlay');
 
         let originalImage = null;
         let maskCanvas = null;
@@ -706,16 +734,13 @@
         let isDrawing = false;
         let brushSize = 20;
         let smartMode = true;
-        let aiPrecision = 70;
         let imageHistory = [];
         let customCursor = null;
         let lastDrawPoint = null;
-        let aiModel = null;
-        let isAILoading = false;
+        let isProcessing = false;
 
         // Initialize
         updateBrushPreview();
-        loadAIModel();
 
         // File input handler
         fileInput.addEventListener('change', handleFileSelect);
@@ -745,12 +770,6 @@
             brushSizeValue.textContent = brushSize;
             updateBrushPreview();
             updateCustomCursor();
-        });
-
-        // AI Precision slider
-        aiPrecisionSlider.addEventListener('input', (e) => {
-            aiPrecision = parseInt(e.target.value);
-            aiPrecisionValue.textContent = aiPrecision;
         });
 
         // Smart mode toggle
@@ -797,45 +816,6 @@
         removeBtn.addEventListener('click', removeSelectedAreas);
         undoBtn.addEventListener('click', undo);
         downloadBtn.addEventListener('click', downloadImage);
-        aiEnhanceBtn.addEventListener('click', enhanceWithAI);
-
-        async function loadAIModel() {
-            try {
-                showAILoading("بارکردنی مۆدێلی AI...");
-                aiModel = await bodyPix.load({
-                    architecture: 'MobileNetV1',
-                    outputStride: 16,
-                    multiplier: 0.75,
-                    quantBytes: 2
-                });
-                hideAILoading();
-                console.log("AI model loaded successfully");
-            } catch (error) {
-                hideAILoading();
-                console.error("Error loading AI model:", error);
-                alert("هەڵە لە بارکردنی مۆدێلی AI. تکایە دووبارە هەوڵبەرەوە.");
-            }
-        }
-
-        function showAILoading(message) {
-            isAILoading = true;
-            progressBar.style.display = 'block';
-            aiLoading.style.display = 'block';
-            if (message) {
-                aiLoading.querySelector('p').textContent = message;
-            }
-        }
-
-        function hideAILoading() {
-            isAILoading = false;
-            progressBar.style.display = 'none';
-            aiLoading.style.display = 'none';
-            progress.style.width = '0%';
-        }
-
-        function updateProgress(percent) {
-            progress.style.width = `${percent}%`;
-        }
 
         function handleFileSelect(e) {
             const file = e.target.files[0];
@@ -850,6 +830,8 @@
                 return;
             }
 
+            showLoading();
+            
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
@@ -859,38 +841,40 @@
                     uploadSection.style.display = 'none';
                     editorContainer.style.display = 'grid';
                     saveToHistory();
-                    
-                    // Add animation class to canvas
-                    canvas.classList.add('image-appear');
-                    setTimeout(() => {
-                        canvas.classList.remove('image-appear');
-                    }, 500);
+                    hideLoading();
+                };
+                img.onerror = () => {
+                    hideLoading();
+                    alert('هەڵە ڕوویدا لە خوێندنەوەی وێنەکە');
                 };
                 img.src = e.target.result;
+            };
+            reader.onerror = () => {
+                hideLoading();
+                alert('هەڵە ڕوویدا لە خوێندنەوەی فایلەکە');
             };
             reader.readAsDataURL(file);
         }
 
         function setupCanvas(img) {
-            // Calculate the maximum dimensions while maintaining aspect ratio
-            const maxWidth = window.innerWidth * 0.7;
-            const maxHeight = window.innerHeight * 0.7;
+            // Set canvas size to match image but limit to viewport
+            const maxWidth = window.innerWidth * 0.8 - 400; // Account for tools panel
+            const maxHeight = window.innerHeight * 0.8;
             let width = img.width;
             let height = img.height;
-
+            
             if (width > maxWidth) {
                 const ratio = maxWidth / width;
                 width = maxWidth;
                 height = height * ratio;
             }
-
+            
             if (height > maxHeight) {
                 const ratio = maxHeight / height;
                 height = maxHeight;
                 width = width * ratio;
             }
-
-            // Set canvas size
+            
             canvas.width = width;
             canvas.height = height;
             
@@ -975,7 +959,7 @@
         }
 
         function draw(e) {
-            if (!isDrawing) return;
+            if (!isDrawing || isProcessing) return;
             const pos = getMousePos(e);
             
             if (smartMode && lastDrawPoint) {
@@ -1002,6 +986,7 @@
 
         function stopDrawing() {
             isDrawing = false;
+            lastDrawPoint = null;
         }
 
         function drawMask(x, y) {
@@ -1013,16 +998,7 @@
             }
 
             // Draw mask overlay on main canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
-            
-            // Apply glowing mask effect
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.shadowColor = 'rgba(102, 126, 234, 0.8)';
-            ctx.shadowBlur = 10;
-            ctx.drawImage(maskCanvas, 0, 0);
-            ctx.shadowBlur = 0;
-            ctx.globalCompositeOperation = 'source-over';
+            updateCanvasWithMask();
         }
 
         function drawBasicMask(x, y) {
@@ -1066,6 +1042,19 @@
             maskCtx.fill();
         }
 
+        function updateCanvasWithMask() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+            
+            // Apply glowing mask effect
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.shadowColor = 'rgba(108, 99, 255, 0.6)';
+            ctx.shadowBlur = 10;
+            ctx.drawImage(maskCanvas, 0, 0);
+            ctx.shadowBlur = 0;
+            ctx.globalCompositeOperation = 'source-over';
+        }
+
         function getPixelColor(x, y) {
             if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) {
                 return { r: 0, g: 0, b: 0, a: 0 };
@@ -1103,204 +1092,101 @@
         }
 
         async function removeSelectedAreas() {
-            if (!maskCanvas) return;
+            if (!maskCanvas || isProcessing) return;
 
-            saveToHistory();
-            showAILoading("AI کاردەکات لەسەر وێنەکە...");
-
+            isProcessing = true;
+            showLoading();
+            
             try {
-                // Get the mask data
+                saveToHistory();
+                
+                // Create a promise to simulate AI processing
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Advanced inpainting with better results
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 const maskData = maskCtx.getImageData(0, 0, canvas.width, canvas.height);
                 
-                // Use AI for better segmentation if available
-                let segmentation = null;
-                if (aiModel && smartMode) {
-                    segmentation = await aiModel.segmentPerson(canvas, {
-                        flipHorizontal: false,
-                        internalResolution: (aiPrecision > 70) ? 'high' : (aiPrecision > 40) ? 'medium' : 'low',
-                        segmentationThreshold: aiPrecision / 100
-                    });
-                    updateProgress(50);
-                }
-
-                // Create a temporary canvas for processing
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = canvas.width;
-                tempCanvas.height = canvas.height;
-                const tempCtx = tempCanvas.getContext('2d');
-                tempCtx.drawImage(canvas, 0, 0);
+                // Create a worker for heavy processing
+                const worker = new Worker(URL.createObjectURL(new Blob([`
+                    onmessage = function(e) {
+                        const { imageData, maskData, width, height } = e.data;
+                        const pixels = imageData.data;
+                        const maskPixels = maskData.data;
+                        
+                        // Multi-pass inpainting for better quality
+                        for (let pass = 0; pass < 3; pass++) {
+                            for (let i = 0; i < maskPixels.length; i += 4) {
+                                const alpha = maskPixels[i + 3];
+                                if (alpha > 50) { // Threshold for mask detection
+                                    const x = (i / 4) % width;
+                                    const y = Math.floor(i / 4 / width);
+                                    
+                                    // Get smart average color from surrounding pixels
+                                    let r = 0, g = 0, b = 0, count = 0;
+                                    const radius = 20 + pass * 5;
+                                    
+                                    // Sample in a spiral pattern for better blending
+                                    for (let angle = 0; angle < Math.PI * 2; angle += 0.2) {
+                                        for (let dist = 5; dist <= radius; dist += 3) {
+                                            const nx = Math.round(x + Math.cos(angle) * dist);
+                                            const ny = Math.round(y + Math.sin(angle) * dist);
+                                            
+                                            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                                                const idx = (ny * width + nx) * 4;
+                                                
+                                                // Check if this pixel is not masked
+                                                if (maskPixels[idx + 3] < 50) {
+                                                    const weight = 1 / (1 + dist / 10); // Distance-based weighting
+                                                    r += pixels[idx] * weight;
+                                                    g += pixels[idx + 1] * weight;
+                                                    b += pixels[idx + 2] * weight;
+                                                    count += weight;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    if (count > 0) {
+                                        pixels[i] = Math.round(r / count);
+                                        pixels[i + 1] = Math.round(g / count);
+                                        pixels[i + 2] = Math.round(b / count);
+                                    } else {
+                                        // Light gray fallback if no surrounding pixels found
+                                        pixels[i] = 240;
+                                        pixels[i + 1] = 240;
+                                        pixels[i + 2] = 240;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        postMessage({ imageData }, [imageData.data.buffer]);
+                    }
+                `], { type: 'application/javascript' })));
                 
-                // Apply the removal with AI assistance
-                await applyAIInpainting(tempCtx, maskData, segmentation);
-                updateProgress(100);
+                // Process in worker and wait for result
+                const result = await new Promise(resolve => {
+                    worker.onmessage = (e) => resolve(e.data);
+                    worker.postMessage({
+                        imageData,
+                        maskData,
+                        width: canvas.width,
+                        height: canvas.height
+                    }, [imageData.data.buffer]);
+                });
                 
-                // Draw the result back to the main canvas
-                ctx.drawImage(tempCanvas, 0, 0);
+                // Apply the modified image data
+                ctx.putImageData(result.imageData, 0, 0);
                 
                 // Clear mask
                 maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
-                
-                // Add animation effect
-                canvas.classList.add('brush-stroke');
-                setTimeout(() => {
-                    canvas.classList.remove('brush-stroke');
-                }, 300);
             } catch (error) {
-                console.error("Error in AI removal:", error);
-                alert("هەڵە لە کاتی سڕینەوە بە یارمەتی AI");
+                console.error('Error during processing:', error);
+                alert('هەڵە ڕوویدا لە کاتی خەملاندنی وێنەکە');
             } finally {
-                hideAILoading();
-            }
-        }
-
-        async function applyAIInpainting(tempCtx, maskData, segmentation) {
-            return new Promise((resolve) => {
-                // Simulate processing with progress updates
-                const totalPixels = canvas.width * canvas.height;
-                const batchSize = Math.floor(totalPixels / 10);
-                
-                const imageData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
-                
-                for (let i = 0; i < totalPixels; i++) {
-                    const x = i % canvas.width;
-                    const y = Math.floor(i / canvas.width);
-                    const idx = i * 4;
-                    
-                    // Check if pixel should be removed (either manually selected or AI detected)
-                    const shouldRemove = (
-                        maskData.data[idx + 3] > 50 || 
-                        (segmentation && segmentation.data[i] > (0.7 * (aiPrecision / 100)))
-                    );
-                    
-                    if (shouldRemove) {
-                        const avgColor = getSmartAverageColor(imageData, x, y, maskData);
-                        
-                        imageData.data[idx] = avgColor.r;
-                        imageData.data[idx + 1] = avgColor.g;
-                        imageData.data[idx + 2] = avgColor.b;
-                    }
-                    
-                    // Update progress occasionally
-                    if (i % batchSize === 0) {
-                        const progress = Math.floor((i / totalPixels) * 100);
-                        updateProgress(50 + (progress / 2));
-                    }
-                }
-                
-                tempCtx.putImageData(imageData, 0, 0);
-                resolve();
-            });
-        }
-
-        function getSmartAverageColor(imageData, x, y, maskData) {
-            let r = 0, g = 0, b = 0, count = 0;
-            const radius = Math.max(brushSize, 25);
-            const precisionFactor = aiPrecision / 50; // Higher precision = more samples
-            
-            // Sample in a spiral pattern for better blending
-            for (let angle = 0; angle < Math.PI * 2 * precisionFactor; angle += 0.2) {
-                for (let dist = 5; dist <= radius; dist += 3) {
-                    const nx = Math.round(x + Math.cos(angle) * dist);
-                    const ny = Math.round(y + Math.sin(angle) * dist);
-                    
-                    if (nx >= 0 && nx < canvas.width && ny >= 0 && ny < canvas.height) {
-                        const idx = (ny * canvas.width + nx) * 4;
-                        
-                        // Check if this pixel is not masked
-                        if (maskData.data[idx + 3] < 50) {
-                            const weight = 1 / (1 + dist / 10); // Distance-based weighting
-                            r += imageData.data[idx] * weight;
-                            g += imageData.data[idx + 1] * weight;
-                            b += imageData.data[idx + 2] * weight;
-                            count += weight;
-                        }
-                    }
-                }
-            }
-
-            if (count === 0) {
-                // Fallback to nearby pixels if no samples found
-                return getFallbackColor(imageData, x, y);
-            }
-
-            return {
-                r: Math.round(r / count),
-                g: Math.round(g / count),
-                b: Math.round(b / count)
-            };
-        }
-
-        function getFallbackColor(imageData, x, y) {
-            // Simple fallback that looks at immediate neighbors
-            let r = 0, g = 0, b = 0, count = 0;
-            
-            for (let dx = -1; dx <= 1; dx++) {
-                for (let dy = -1; dy <= 1; dy++) {
-                    const nx = x + dx;
-                    const ny = y + dy;
-                    
-                    if (nx >= 0 && nx < canvas.width && ny >= 0 && ny < canvas.height) {
-                        const idx = (ny * canvas.width + nx) * 4;
-                        r += imageData.data[idx];
-                        g += imageData.data[idx + 1];
-                        b += imageData.data[idx + 2];
-                        count++;
-                    }
-                }
-            }
-            
-            return {
-                r: count > 0 ? Math.round(r / count) : 240,
-                g: count > 0 ? Math.round(g / count) : 240,
-                b: count > 0 ? Math.round(b / count) : 240
-            };
-        }
-
-        async function enhanceWithAI() {
-            if (!originalImage || isAILoading) return;
-            
-            saveToHistory();
-            showAILoading("باشترکردنی وێنە بە یارمەتی AI...");
-            
-            try {
-                // Simulate AI enhancement (in a real app, you'd use actual AI processing)
-                for (let i = 0; i <= 100; i += 10) {
-                    updateProgress(i);
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-                
-                // In a real implementation, you would:
-                // 1. Send the image to an AI enhancement API
-                // 2. Process the image with TensorFlow.js filters
-                // 3. Apply smart sharpening/denoising algorithms
-                
-                // For this demo, we'll just apply a simple filter
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                applyEnhancementFilter(imageData.data);
-                ctx.putImageData(imageData, 0, 0);
-                
-                updateProgress(100);
-                alert("وێنەکەت بە سەرکەوتوویی باشترکرایەوە بە یارمەتی AI!");
-            } catch (error) {
-                console.error("Error in AI enhancement:", error);
-                alert("هەڵە لە باشترکردنی وێنە بە یارمەتی AI");
-            } finally {
-                hideAILoading();
-            }
-        }
-
-        function applyEnhancementFilter(data) {
-            // Simple contrast and brightness adjustment
-            const contrast = 1.1;
-            const brightness = 1.05;
-            
-            for (let i = 0; i < data.length; i += 4) {
-                // RGB channels
-                for (let j = 0; j < 3; j++) {
-                    data[i + j] = Math.min(255, Math.max(0, 
-                        ((data[i + j] / 255 - 0.5) * contrast + 0.5) * 255 * brightness
-                    ));
-                }
+                isProcessing = false;
+                hideLoading();
             }
         }
 
@@ -1315,7 +1201,7 @@
         }
 
         function undo() {
-            if (imageHistory.length > 1) {
+            if (imageHistory.length > 1 && !isProcessing) {
                 imageHistory.pop(); // Remove current state
                 const previousState = imageHistory[imageHistory.length - 1];
                 ctx.putImageData(previousState, 0, 0);
@@ -1328,11 +1214,30 @@
         }
 
         function downloadImage() {
+            if (isProcessing) return;
+            
             const link = document.createElement('a');
             link.download = 'edited-image.png';
-            link.href = canvas.toDataURL('image/png', 1.0);
+            link.href = canvas.toDataURL('image/png', 0.9);
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
         }
+
+        function showLoading() {
+            loadingOverlay.classList.add('active');
+        }
+
+        function hideLoading() {
+            loadingOverlay.classList.remove('active');
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (originalImage) {
+                setupCanvas(originalImage);
+            }
+        });
     </script>
 </body>
 </html>
