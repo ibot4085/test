@@ -418,7 +418,6 @@
         let imageHistory = [];
         let scaleFactor = 1;
         let cvLoadCheckInterval;
-        let lastClickTime = 0;
 
         // دەستپێکردن
         removeBtn.disabled = true;
@@ -501,20 +500,15 @@
         // ماسک کردن
         canvas.addEventListener('mousedown', function(e) {
             e.preventDefault();
-            const now = Date.now();
-            if (now - lastClickTime < 300) { // Double click detection
-                return;
-            }
-            lastClickTime = now;
-            
             isDrawing = true;
             drawMask(e);
-            
-            // Immediately remove the selected area
-            removeSelectedAreas();
         });
 
         canvas.addEventListener('mousemove', function(e) {
+            if (isDrawing) {
+                e.preventDefault();
+                drawMask(e);
+            }
             updateBrushPreview(e);
         });
 
@@ -582,17 +576,14 @@
             const x = (e.clientX - rect.left) * scaleX;
             const y = (e.clientY - rect.top) * scaleY;
             
-            // Clear previous mask
-            maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
-            
-            // Create new mask with red color to show the selected area
+            // Draw the visible red mask for user
             maskCtx.globalCompositeOperation = 'source-over';
             maskCtx.fillStyle = 'rgba(255, 0, 0, 0.5)';
             maskCtx.beginPath();
             maskCtx.arc(x, y, brushSize/2, 0, Math.PI * 2);
             maskCtx.fill();
             
-            // Create a stronger mask for OpenCV (white)
+            // Draw the actual white mask for OpenCV (fully opaque)
             maskCtx.globalCompositeOperation = 'source-over';
             maskCtx.fillStyle = 'rgba(255, 255, 255, 1)';
             maskCtx.beginPath();
@@ -637,6 +628,7 @@
                     }
                     
                     if (!hasMask) {
+                        alert('تکایە یەکێک لە ناوچەکانی وێنە دیاری بکە بە فرچەکە پێش سڕینەوە!');
                         loadingOverlay.style.display = 'none';
                         return;
                     }
@@ -668,10 +660,10 @@
                     const maskImageData = fullSizeMaskCtx.getImageData(0, 0, fullSizeMask.width, fullSizeMask.height);
                     const maskData = maskImageData.data;
                     
-                    // گۆڕینی ماسک بۆ شێوەی OpenCV
+                    // گۆڕینی ماسک بۆ شێوەی OpenCV (سپی بۆ ناوچەی سڕاوەوە، ڕەش بۆ ناوچەی پارێزراو)
                     for (let i = 0; i < maskData.length; i += 4) {
-                        // ئەگەر سپی بوو (ماسک) بیکە بە سپی، وەک نەبێت بیکە بە ڕەش
-                        if (maskData[i] > 128) { // ئەگەر ڕەنگی سپی یان نزیک لە سپی
+                        // ئەگەر سوور بوو (ماسک) بیکە بە سپی، وەک نەبێت بیکە بە ڕەش
+                        if (maskData[i] > 128 || maskData[i+1] > 0 || maskData[i+2] > 0) {
                             maskData[i] = maskData[i+1] = maskData[i+2] = 255;  // سپی
                             maskData[i+3] = 255;  // A
                         } else {
@@ -689,8 +681,13 @@
                     const mask = cv.imread(fullSizeMask);
                     const dst = new cv.Mat();
                     
+                    // Convert mask to grayscale
                     cv.cvtColor(mask, mask, cv.COLOR_RGBA2GRAY);
+                    
+                    // Threshold to ensure binary mask
                     cv.threshold(mask, mask, 128, 255, cv.THRESH_BINARY);
+                    
+                    // Apply inpainting
                     cv.inpaint(src, mask, dst, 3, cv.INPAINT_TELEA);
                     
                     // هەڵگرتنی ئەنجام
@@ -735,7 +732,11 @@
             tempCtx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
             
             const imageData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
-            imageHistory.push(imageData);
+            imageHistory.push({
+                imageData: imageData,
+                maskData: maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height)
+            });
+            
             if (imageHistory.length > 10) {
                 imageHistory.shift();
             }
@@ -752,14 +753,17 @@
                 tempCanvas.width = canvas.width;
                 tempCanvas.height = canvas.height;
                 const tempCtx = tempCanvas.getContext('2d');
-                tempCtx.putImageData(prevState, 0, 0);
+                tempCtx.putImageData(prevState.imageData, 0, 0);
                 
                 // نوێکردنەوەی وێنەی سەرەکی
                 originalImage.src = tempCanvas.toDataURL();
                 originalImage.onload = function() {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
-                    maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+                    
+                    // نوێکردنەوەی ماسک
+                    maskCtx.putImageData(prevState.maskData, 0, 0);
+                    updateCanvas();
                 };
             }
         }
