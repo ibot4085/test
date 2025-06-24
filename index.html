@@ -4,35 +4,368 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سڕینەوەی زیرەکی شت لە وێنە</title>
-    
     <!-- TensorFlow.js -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
-    
     <!-- OpenCV.js -->
     <script async src="https://docs.opencv.org/4.5.5/opencv.js" onload="onOpenCvReady();"></script>
+    <!-- فۆنتەکە بۆ کوردی -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* CSS هەموو لێرەن */
-        body {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: 'Noto Sans Arabic', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            /* ... */
         }
-        /* ... */
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #4a5568;
+            font-size: 1.1rem;
+        }
+
+        .upload-section {
+            border: 3px dashed #cbd5e0;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #f7fafc, #edf2f7);
+        }
+
+        .upload-section:hover {
+            border-color: #667eea;
+            background: linear-gradient(45deg, #edf2f7, #e2e8f0);
+        }
+
+        .upload-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .editor-container {
+            display: none;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .canvas-container {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        #imageCanvas {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            cursor: crosshair;
+        }
+
+        .tools-panel {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .tool-group {
+            margin-bottom: 25px;
+        }
+
+        .tool-group h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn.remove {
+            background: linear-gradient(45deg, #e53e3e, #c53030);
+            color: white;
+        }
+
+        .action-btn.undo {
+            background: linear-gradient(45deg, #4299e1, #3182ce);
+            color: white;
+        }
+
+        .action-btn.download {
+            background: linear-gradient(45deg, #38a169, #2f855a);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- ناوەڕۆک -->
+        <div class="header">
+            <h1>سڕینەوەی زیرەکی شت لە وێنە</h1>
+            <p>وێنەکەت هەڵبژێرە و شتەکانی ناخوازراوت لێ بسڕەوە بە شێوەیەکی زیرەک</p>
+        </div>
+
+        <div class="upload-section" id="uploadSection">
+            <div>
+                <h2>وێنەکەت بخەرە ئێرە</h2>
+                <p>یان کلیک بکە بۆ هەڵبژاردن</p>
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    هەڵبژاردنی وێنە
+                </button>
+                <input type="file" id="fileInput" class="file-input" accept="image/*">
+            </div>
+        </div>
+
+        <div class="editor-container" id="editorContainer">
+            <div class="canvas-container">
+                <canvas id="imageCanvas"></canvas>
+            </div>
+            
+            <div class="tools-panel">
+                <div class="tool-group">
+                    <h3>فرچەی زیرەک</h3>
+                    <label for="brushSize">قەبارەی فرچە: <span id="brushSizeValue">20</span>px</label>
+                    <input type="range" id="brushSize" class="brush-size" min="10" max="80" value="20">
+                </div>
+
+                <div class="tool-group">
+                    <h3>کارەکان</h3>
+                    <button class="action-btn remove" id="removeBtn">
+                        سڕینەوەی ناوچەکان
+                    </button>
+                    <button class="action-btn undo" id="undoBtn">
+                        گەڕاندنەوە
+                    </button>
+                    <button class="action-btn download" id="downloadBtn">
+                        دابەزاندنی وێنە
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // JavaScript هەموو لێرەن
+        // گەر OpenCV بارکرا
         function onOpenCvReady() {
-            console.log("OpenCV آمادەیە!");
+            console.log("OpenCV ئامادەیە!");
+            document.getElementById('removeBtn').disabled = false;
         }
-        
-        // ... کۆدەکانی تر
+
+        const canvas = document.getElementById('imageCanvas');
+        const ctx = canvas.getContext('2d');
+        const fileInput = document.getElementById('fileInput');
+        const uploadSection = document.getElementById('uploadSection');
+        const editorContainer = document.getElementById('editorContainer');
+        const brushSizeSlider = document.getElementById('brushSize');
+        const brushSizeValue = document.getElementById('brushSizeValue');
+        const removeBtn = document.getElementById('removeBtn');
+        const undoBtn = document.getElementById('undoBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        let originalImage = null;
+        let maskCanvas = null;
+        let maskCtx = null;
+        let isDrawing = false;
+        let brushSize = 20;
+        let imageHistory = [];
+
+        // دەستپێکردن
+        removeBtn.disabled = true;
+
+        // هەڵگرتنی فایل
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        originalImage = img;
+                        setupCanvas(img);
+                        uploadSection.style.display = 'none';
+                        editorContainer.style.display = 'grid';
+                        saveToHistory();
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // ڕێکخستنی کەنڤاس
+        function setupCanvas(img) {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            
+            maskCanvas = document.createElement('canvas');
+            maskCanvas.width = img.width;
+            maskCanvas.height = img.height;
+            maskCtx = maskCanvas.getContext('2d');
+        }
+
+        // ماسک کردن
+        canvas.addEventListener('mousedown', function(e) {
+            isDrawing = true;
+            drawMask(e);
+        });
+
+        canvas.addEventListener('mousemove', function(e) {
+            if (isDrawing) {
+                drawMask(e);
+            }
+        });
+
+        canvas.addEventListener('mouseup', function() {
+            isDrawing = false;
+        });
+
+        canvas.addEventListener('mouseout', function() {
+            isDrawing = false;
+        });
+
+        function drawMask(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            maskCtx.globalCompositeOperation = 'source-over';
+            maskCtx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+            maskCtx.beginPath();
+            maskCtx.arc(x, y, brushSize/2, 0, Math.PI * 2);
+            maskCtx.fill();
+            
+            // نیشاندانی ماسک
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.drawImage(originalImage, 0, 0);
+            ctx.globalCompositeOperation = 'multiply';
+            ctx.drawImage(maskCanvas, 0, 0);
+        }
+
+        // سڕینەوە بە OpenCV
+        function removeSelectedAreas() {
+            if (!window.cv) {
+                alert('OpenCV هێشتا بارنەکراوە!');
+                return;
+            }
+
+            saveToHistory();
+            
+            const src = cv.imread('imageCanvas');
+            const mask = cv.imread(maskCanvas);
+            const dst = new cv.Mat();
+            
+            cv.inpaint(src, mask, dst, 3, cv.INPAINT_TELEA);
+            
+            cv.imshow('imageCanvas', dst);
+            
+            src.delete();
+            mask.delete();
+            dst.delete();
+            
+            maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+        }
+
+        // پاشەکەوتکردنی مێژوو
+        function saveToHistory() {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            imageHistory.push(imageData);
+            if (imageHistory.length > 10) {
+                imageHistory.shift();
+            }
+        }
+
+        // گەڕاندنەوە
+        function undo() {
+            if (imageHistory.length > 1) {
+                imageHistory.pop();
+                const prevState = imageHistory[imageHistory.length - 1];
+                ctx.putImageData(prevState, 0, 0);
+                maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+            }
+        }
+
+        // دابەزاندن
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'وێنەی_چاککراو.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        // بەستەرەکان
+        brushSizeSlider.addEventListener('input', function(e) {
+            brushSize = e.target.value;
+            brushSizeValue.textContent = brushSize;
+        });
+
+        removeBtn.addEventListener('click', removeSelectedAreas);
+        undoBtn.addEventListener('click', undo);
+        downloadBtn.addEventListener('click', downloadImage);
     </script>
 </body>
 </html>
