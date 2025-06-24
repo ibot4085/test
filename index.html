@@ -7,6 +7,8 @@
     <!-- TensorFlow.js and BodyPix for AI capabilities -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@latest"></script>
+    <!-- OpenCV.js -->
+    <script async src="https://docs.opencv.org/4.5.5/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
     <style>
         * {
             margin: 0;
@@ -666,7 +668,7 @@
                 <div class="ai-tools-section">
                     <h4>تایبەتمەندییەکانی AI</h4>
                     <p style="font-size: 0.85rem; color: #666; line-height: 1.5;">
-                        ئەم ئامرازە بە یارمەتی تەکنەلۆژیای TensorFlow.js کاردەکات بۆ:
+                        ئەم ئامرازە بە یارمەتی تەکنەلۆژیای TensorFlow.js و OpenCV.js کاردەکات بۆ:
                         <br>- ناسینەوەی خۆکارانەی کەس و شت
                         <br>- سڕینەوەی وێنە بە شێوەیەکی سروشتی
                         <br>- باشترکردنی کوالێتی وێنە دوای سڕینەوە
@@ -676,7 +678,7 @@
         </div>
 
         <div class="creator-credit">
-            Created by Ibrahim Mala Taha | Powered by TensorFlow.js
+            Created by Ibrahim Mala Taha | Powered by TensorFlow.js & OpenCV.js
         </div>
     </div>
 
@@ -712,10 +714,17 @@
         let lastDrawPoint = null;
         let aiModel = null;
         let isAILoading = false;
+        let opencvReady = false;
 
         // Initialize
         updateBrushPreview();
         loadAIModel();
+
+        // OpenCV.js ready callback
+        function onOpenCvReady() {
+            opencvReady = true;
+            console.log('OpenCV.js is ready');
+        }
 
         // File input handler
         fileInput.addEventListener('change', handleFileSelect);
@@ -1120,7 +1129,7 @@
                         internalResolution: (aiPrecision > 70) ? 'high' : (aiPrecision > 40) ? 'medium' : 'low',
                         segmentationThreshold: aiPrecision / 100
                     });
-                    updateProgress(50);
+                    updateProgress(30);
                 }
 
                 // Create a temporary canvas for processing
@@ -1130,8 +1139,13 @@
                 const tempCtx = tempCanvas.getContext('2d');
                 tempCtx.drawImage(canvas, 0, 0);
                 
-                // Apply the removal with AI assistance
-                await applyAIInpainting(tempCtx, maskData, segmentation);
+                // Apply the removal with OpenCV for better inpainting
+                if (opencvReady) {
+                    await applyOpenCVInpainting(tempCtx, maskData, segmentation);
+                } else {
+                    // Fallback to basic removal if OpenCV not ready
+                    await applyBasicInpainting(tempCtx, maskData, segmentation);
+                }
                 updateProgress(100);
                 
                 // Draw the result back to the main canvas
@@ -1153,13 +1167,59 @@
             }
         }
 
-        async function applyAIInpainting(tempCtx, maskData, segmentation) {
+        async function applyOpenCVInpainting(tempCtx, maskData, segmentation) {
             return new Promise((resolve) => {
-                // Simulate processing with progress updates
+                // Create OpenCV mat from canvas
+                const src = cv.imread(tempCanvas);
+                const mask = new cv.Mat();
+                
+                // Create mask from our selection and AI segmentation
+                const maskCanvas = document.createElement('canvas');
+                maskCanvas.width = canvas.width;
+                maskCanvas.height = canvas.height;
+                const maskCtx = maskCanvas.getContext('2d');
+                
+                // Draw manual selection
+                maskCtx.putImageData(maskData, 0, 0);
+                
+                // Draw AI segmentation if available
+                if (segmentation) {
+                    const segmentationMask = new ImageData(
+                        new Uint8ClampedArray(segmentation.data.buffer),
+                        canvas.width,
+                        canvas.height
+                    );
+                    maskCtx.putImageData(segmentationMask, 0, 0);
+                }
+                
+                // Convert mask to OpenCV format
+                cv.cvtColor(cv.imread(maskCanvas), mask, cv.COLOR_RGBA2GRAY, 0);
+                
+                // Threshold the mask
+                cv.threshold(mask, mask, 1, 255, cv.THRESH_BINARY);
+                
+                // Apply inpainting
+                const inpainted = new cv.Mat();
+                cv.inpaint(src, mask, inpainted, 3, cv.INPAINT_TELEA);
+                
+                // Convert back to canvas
+                cv.imshow(tempCanvas, inpainted);
+                
+                // Clean up
+                src.delete();
+                mask.delete();
+                inpainted.delete();
+                
+                updateProgress(90);
+                resolve();
+            });
+        }
+
+        async function applyBasicInpainting(tempCtx, maskData, segmentation) {
+            return new Promise((resolve) => {
+                const imageData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
                 const totalPixels = canvas.width * canvas.height;
                 const batchSize = Math.floor(totalPixels / 10);
-                
-                const imageData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
                 
                 for (let i = 0; i < totalPixels; i++) {
                     const x = i % canvas.width;
@@ -1182,8 +1242,8 @@
                     
                     // Update progress occasionally
                     if (i % batchSize === 0) {
-                        const progress = Math.floor((i / totalPixels) * 100);
-                        updateProgress(50 + (progress / 2));
+                        const progress = Math.floor((i / totalPixels) * 60) + 30;
+                        updateProgress(progress);
                     }
                 }
                 
@@ -1239,7 +1299,7 @@
                     const nx = x + dx;
                     const ny = y + dy;
                     
-                    if (nx >= 0 && nx < canvas.width && ny >= 0 && ny < canvas.height) {
+                    if (nx >= 0 || nx < canvas.width || ny >= 0 || ny < canvas.height) {
                         const idx = (ny * canvas.width + nx) * 4;
                         r += imageData.data[idx];
                         g += imageData.data[idx + 1];
@@ -1263,21 +1323,13 @@
             showAILoading("باشترکردنی وێنە بە یارمەتی AI...");
             
             try {
-                // Simulate AI enhancement (in a real app, you'd use actual AI processing)
-                for (let i = 0; i <= 100; i += 10) {
-                    updateProgress(i);
-                    await new Promise(resolve => setTimeout(resolve, 100));
+                // Use OpenCV for enhancement if available
+                if (opencvReady) {
+                    await applyOpenCVEnhancement();
+                } else {
+                    // Fallback to basic enhancement
+                    await applyBasicEnhancement();
                 }
-                
-                // In a real implementation, you would:
-                // 1. Send the image to an AI enhancement API
-                // 2. Process the image with TensorFlow.js filters
-                // 3. Apply smart sharpening/denoising algorithms
-                
-                // For this demo, we'll just apply a simple filter
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                applyEnhancementFilter(imageData.data);
-                ctx.putImageData(imageData, 0, 0);
                 
                 updateProgress(100);
                 alert("وێنەکەت بە سەرکەوتوویی باشترکرایەوە بە یارمەتی AI!");
@@ -1287,6 +1339,73 @@
             } finally {
                 hideAILoading();
             }
+        }
+
+        async function applyOpenCVEnhancement() {
+            return new Promise((resolve) => {
+                // Create OpenCV mat from canvas
+                const src = cv.imread(canvas);
+                
+                // Convert to LAB color space for better color enhancement
+                const lab = new cv.Mat();
+                cv.cvtColor(src, lab, cv.COLOR_RGBA2RGB);
+                cv.cvtColor(lab, lab, cv.COLOR_RGB2Lab);
+                
+                // Split channels
+                const channels = new cv.MatVector();
+                cv.split(lab, channels);
+                
+                // Apply CLAHE to L channel (lightness)
+                const clahe = new cv.CLAHE();
+                clahe.setClipLimit(2);
+                clahe.apply(channels.get(0), channels.get(0));
+                
+                // Merge channels back
+                cv.merge(channels, lab);
+                
+                // Convert back to RGB
+                cv.cvtColor(lab, lab, cv.COLOR_Lab2RGB);
+                cv.cvtColor(lab, lab, cv.COLOR_RGB2RGBA);
+                
+                // Apply sharpening
+                const sharpened = new cv.Mat();
+                const kernel = cv.matFromArray(3, 3, cv.CV_32FC1, [
+                    0, -1, 0,
+                    -1, 5, -1,
+                    0, -1, 0
+                ]);
+                cv.filter2D(lab, sharpened, -1, kernel);
+                
+                // Convert back to canvas
+                cv.imshow(canvas, sharpened);
+                
+                // Clean up
+                src.delete();
+                lab.delete();
+                channels.delete();
+                clahe.delete();
+                sharpened.delete();
+                kernel.delete();
+                
+                resolve();
+            });
+        }
+
+        async function applyBasicEnhancement() {
+            return new Promise((resolve) => {
+                // Simulate AI enhancement with progress updates
+                for (let i = 0; i <= 100; i += 10) {
+                    updateProgress(i);
+                    setTimeout(() => {}, 100);
+                }
+                
+                // Apply basic enhancement filter
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                applyEnhancementFilter(imageData.data);
+                ctx.putImageData(imageData, 0, 0);
+                
+                resolve();
+            });
         }
 
         function applyEnhancementFilter(data) {
