@@ -24,6 +24,7 @@
             min-height: 100vh;
             padding: 20px;
             direction: rtl;
+            overflow-x: hidden;
         }
 
         .container {
@@ -102,12 +103,14 @@
             max-width: 100%;
             max-height: 70vh;
             overflow: auto;
+            touch-action: none; /* Prevent scrolling on touch devices */
         }
 
         #imageCanvas {
             display: block;
             cursor: crosshair;
             max-width: 100%;
+            touch-action: none; /* Prevent scrolling on touch devices */
         }
 
         .tools-panel {
@@ -262,7 +265,7 @@
         // ڕێکخستنی کەنڤاس
         function setupCanvas(img) {
             // پێوانەکردنی وێنەکە بۆ گونجاندن لە ناو شاشەکە
-            const maxWidth = window.innerWidth * 0.7;
+            const maxWidth = window.innerWidth * 0.6;
             const maxHeight = window.innerHeight * 0.7;
             
             let width = img.width;
@@ -299,28 +302,63 @@
 
         // ماسک کردن
         canvas.addEventListener('mousedown', function(e) {
+            e.preventDefault(); // Prevent default behavior (scrolling)
             isDrawing = true;
             drawMask(e);
         });
 
         canvas.addEventListener('mousemove', function(e) {
             if (isDrawing) {
+                e.preventDefault(); // Prevent default behavior (scrolling)
                 drawMask(e);
             }
         });
 
-        canvas.addEventListener('mouseup', function() {
+        canvas.addEventListener('mouseup', function(e) {
+            e.preventDefault(); // Prevent default behavior (scrolling)
             isDrawing = false;
         });
 
-        canvas.addEventListener('mouseout', function() {
+        canvas.addEventListener('mouseout', function(e) {
+            e.preventDefault(); // Prevent default behavior (scrolling)
             isDrawing = false;
+        });
+
+        // Touch events for mobile devices
+        canvas.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            isDrawing = true;
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousedown', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        });
+
+        canvas.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+            if (isDrawing) {
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            }
+        });
+
+        canvas.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            isDrawing = false;
+            const mouseEvent = new MouseEvent('mouseup', {});
+            canvas.dispatchEvent(mouseEvent);
         });
 
         function drawMask(e) {
             const rect = canvas.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / scaleFactor;
-            const y = (e.clientY - rect.top) / scaleFactor;
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
             
             maskCtx.globalCompositeOperation = 'source-over';
             maskCtx.fillStyle = 'rgba(255, 0, 0, 0.5)';
@@ -353,7 +391,17 @@
             tempCtx.drawImage(originalImage, 0, 0);
             
             const src = cv.imread(tempCanvas);
-            const mask = cv.imread(maskCanvas);
+            
+            // دروستکردنی ماسکێکی گەورە بۆ قەبارەی ڕاستەقینە
+            const fullSizeMaskCanvas = document.createElement('canvas');
+            fullSizeMaskCanvas.width = originalImage.width;
+            fullSizeMaskCanvas.height = originalImage.height;
+            const fullSizeMaskCtx = fullSizeMaskCanvas.getContext('2d');
+            
+            // گەورەکردنی ماسکە بچووکەکە بۆ قەبارەی ڕاستەقینە
+            fullSizeMaskCtx.drawImage(maskCanvas, 0, 0, originalImage.width, originalImage.height);
+            
+            const mask = cv.imread(fullSizeMaskCanvas);
             const dst = new cv.Mat();
             
             cv.inpaint(src, mask, dst, 3, cv.INPAINT_TELEA);
