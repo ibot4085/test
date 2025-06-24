@@ -394,8 +394,11 @@
 
         function drawMask(e) {
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
             
             maskCtx.globalCompositeOperation = 'source-over';
             maskCtx.fillStyle = 'rgba(255, 0, 0, 0.5)';
@@ -403,7 +406,11 @@
             maskCtx.arc(x, y, brushSize/2, 0, Math.PI * 2);
             maskCtx.fill();
             
-            // نیشاندانی ماسک
+            updateCanvas();
+        }
+
+        // نوێکردنەوەی کەنڤاس
+        function updateCanvas() {
             ctx.globalCompositeOperation = 'source-over';
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
@@ -444,40 +451,39 @@
             await new Promise(resolve => setTimeout(resolve, 50));
             
             try {
-                // دروستکردنی کەنڤاسێکی کاتی بۆ کارکردن بە قەبارەی ڕاستەقینە
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = originalImage.width;
-                tempCanvas.height = originalImage.height;
-                const tempCtx = tempCanvas.getContext('2d');
-                tempCtx.drawImage(originalImage, 0, 0);
+                // دروستکردنی کەنڤاسی سەرچاوە بە قەبارەی ڕاستەقینە
+                const sourceCanvas = document.createElement('canvas');
+                sourceCanvas.width = originalImage.naturalWidth;
+                sourceCanvas.height = originalImage.naturalHeight;
+                const sourceCtx = sourceCanvas.getContext('2d');
+                sourceCtx.drawImage(originalImage, 0, 0, sourceCanvas.width, sourceCanvas.height);
                 
-                // دروستکردنی ماسکێکی گەورە بۆ قەبارەی ڕاستەقینە
-                const fullSizeMaskCanvas = document.createElement('canvas');
-                fullSizeMaskCanvas.width = originalImage.width;
-                fullSizeMaskCanvas.height = originalImage.height;
-                const fullSizeMaskCtx = fullSizeMaskCanvas.getContext('2d');
+                // دروستکردنی ماسک بە قەبارەی ڕاستەقینە
+                const fullSizeMask = document.createElement('canvas');
+                fullSizeMask.width = originalImage.naturalWidth;
+                fullSizeMask.height = originalImage.naturalHeight;
+                const fullSizeMaskCtx = fullSizeMask.getContext('2d');
                 
-                // گەورەکردنی ماسکە بچووکەکە بۆ قەبارەی ڕاستەقینە
-                fullSizeMaskCtx.drawImage(maskCanvas, 0, 0, originalImage.width, originalImage.height);
+                // گەورەکردنی ماسک
+                fullSizeMaskCtx.drawImage(maskCanvas, 0, 0, fullSizeMask.width, fullSizeMask.height);
                 
-                const src = cv.imread(tempCanvas);
-                const mask = cv.imread(fullSizeMaskCanvas);
+                // کرداری سڕینەوە
+                const src = cv.imread(sourceCanvas);
+                const mask = cv.imread(fullSizeMask);
                 const dst = new cv.Mat();
                 
                 cv.inpaint(src, mask, dst, 3, cv.INPAINT_TELEA);
                 
-                // هەڵگرتنی ئەنجامەکە و نمایشدان لە کەنڤاسە بچووکەکە
-                cv.imshow(tempCanvas, dst);
+                // هەڵگرتنی ئەنجام
+                cv.imshow(sourceCanvas, dst);
                 
-                // نوێکردنەوەی وێنەکە
-                originalImage = new Image();
-                await new Promise((resolve) => {
+                // نوێکردنەوەی وێنە
+                originalImage.src = sourceCanvas.toDataURL();
+                await new Promise(resolve => {
                     originalImage.onload = resolve;
-                    originalImage.src = tempCanvas.toDataURL();
                 });
                 
-                // نوێکردنەوەی وێنەکە لەسەر کەنڤاسە سەرەکییەکە
-                ctx.globalCompositeOperation = 'source-over';
+                // نوێکردنەوەی کەنڤاس
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
                 
