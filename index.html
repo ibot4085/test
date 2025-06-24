@@ -31,11 +31,13 @@
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.5s ease;
         }
 
         .header {
             text-align: center;
             margin-bottom: 30px;
+            animation: fadeIn 1s ease;
         }
 
         .header h1 {
@@ -51,6 +53,7 @@
         .header p {
             color: #4a5568;
             font-size: 1.1rem;
+            animation: slideIn 0.8s ease;
         }
 
         .upload-section {
@@ -61,11 +64,14 @@
             margin-bottom: 30px;
             transition: all 0.3s ease;
             background: linear-gradient(45deg, #f7fafc, #edf2f7);
+            animation: bounceIn 1s ease;
         }
 
         .upload-section:hover {
             border-color: #667eea;
             background: linear-gradient(45deg, #edf2f7, #e2e8f0);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.2);
         }
 
         .upload-btn {
@@ -78,11 +84,17 @@
             cursor: pointer;
             transition: all 0.3s ease;
             margin: 10px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
         .upload-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .upload-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
         }
 
         .editor-container {
@@ -90,6 +102,14 @@
             grid-template-columns: 1fr 300px;
             gap: 30px;
             margin-top: 30px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .editor-container.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .canvas-container {
@@ -101,6 +121,7 @@
             max-height: 70vh;
             overflow: auto;
             touch-action: none;
+            background: #f0f0f0;
         }
 
         #imageCanvas {
@@ -108,6 +129,11 @@
             cursor: crosshair;
             max-width: 100%;
             touch-action: none;
+            transition: all 0.3s ease;
+        }
+
+        #imageCanvas:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .tools-panel {
@@ -115,10 +141,12 @@
             border-radius: 15px;
             padding: 25px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            animation: slideInRight 0.8s ease;
         }
 
         .tool-group {
             margin-bottom: 25px;
+            animation: fadeIn 0.8s ease;
         }
 
         .tool-group h3 {
@@ -136,6 +164,26 @@
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .action-btn:focus:not(:active)::after {
+            animation: ripple 0.6s ease-out;
         }
 
         .action-btn.remove {
@@ -153,6 +201,16 @@
             color: white;
         }
 
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
         .loading-overlay {
             display: none;
             position: fixed;
@@ -167,6 +225,7 @@
             color: white;
             font-size: 1.5rem;
             flex-direction: column;
+            animation: fadeIn 0.3s ease;
         }
 
         .loading-spinner {
@@ -179,9 +238,88 @@
             margin-bottom: 20px;
         }
 
+        .progress-bar {
+            width: 200px;
+            height: 10px;
+            background: #444;
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .brush-preview {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            border: 2px solid #e53e3e;
+            background: rgba(229, 62, 62, 0.2);
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            display: none;
+        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from { 
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% { 
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            50% { 
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            100% { 
+                transform: scale(1);
+            }
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
         }
 
         @media (max-width: 768px) {
@@ -199,6 +337,9 @@
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
         <p>تکایە چاوەڕێ بکە... پرۆسەی سڕینەوە ئەنجام دەدرێت</p>
+        <div class="progress-bar">
+            <div class="progress" id="progressBar"></div>
+        </div>
     </div>
 
     <div class="container">
@@ -221,13 +362,14 @@
         <div class="editor-container" id="editorContainer">
             <div class="canvas-container">
                 <canvas id="imageCanvas"></canvas>
+                <div class="brush-preview" id="brushPreview"></div>
             </div>
             
             <div class="tools-panel">
                 <div class="tool-group">
                     <h3>فرچەی زیرەک</h3>
                     <label for="brushSize">قەبارەی فرچە: <span id="brushSizeValue">20</span>px</label>
-                    <input type="range" id="brushSize" class="brush-size" min="10" max="80" value="20">
+                    <input type="range" id="brushSize" class="brush-size" min="5" max="80" value="20">
                 </div>
 
                 <div class="tool-group">
@@ -265,6 +407,8 @@
         const undoBtn = document.getElementById('undoBtn');
         const downloadBtn = document.getElementById('downloadBtn');
         const loadingOverlay = document.getElementById('loadingOverlay');
+        const progressBar = document.getElementById('progressBar');
+        const brushPreview = document.getElementById('brushPreview');
 
         let originalImage = null;
         let maskCanvas = null;
@@ -304,6 +448,9 @@
                         setupCanvas(img);
                         uploadSection.style.display = 'none';
                         editorContainer.style.display = 'grid';
+                        setTimeout(() => {
+                            editorContainer.classList.add('show');
+                        }, 50);
                         saveToHistory();
                     };
                     img.src = event.target.result;
@@ -362,17 +509,33 @@
                 e.preventDefault();
                 drawMask(e);
             }
+            updateBrushPreview(e);
         });
 
         canvas.addEventListener('mouseup', function(e) {
             e.preventDefault();
             isDrawing = false;
+            brushPreview.style.display = 'none';
         });
 
         canvas.addEventListener('mouseout', function(e) {
             e.preventDefault();
             isDrawing = false;
+            brushPreview.style.display = 'none';
         });
+
+        // نمایشی فرچە
+        function updateBrushPreview(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            brushPreview.style.width = brushSize + 'px';
+            brushPreview.style.height = brushSize + 'px';
+            brushPreview.style.left = x + 'px';
+            brushPreview.style.top = y + 'px';
+            brushPreview.style.display = 'block';
+        }
 
         // Touch events for mobile devices
         canvas.addEventListener('touchstart', function(e) {
@@ -419,6 +582,13 @@
             maskCtx.arc(x, y, brushSize/2, 0, Math.PI * 2);
             maskCtx.fill();
             
+            // دروستکردنی ماسکی بەهێزتر بۆ OpenCV
+            maskCtx.globalCompositeOperation = 'source-over';
+            maskCtx.fillStyle = 'rgba(255, 255, 255, 1)'; // سپی بە تەواوی بۆ ماسک
+            maskCtx.beginPath();
+            maskCtx.arc(x, y, brushSize/2, 0, Math.PI * 2);
+            maskCtx.fill();
+            
             updateCanvas();
         }
 
@@ -427,6 +597,8 @@
             ctx.globalCompositeOperation = 'source-over';
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+            
+            // نمایشی ماسک بە شێوەیەکی ڕەنگاوڕەنگ بۆ بەکارهێنەر
             ctx.globalCompositeOperation = 'multiply';
             ctx.drawImage(maskCanvas, 0, 0);
         }
@@ -434,6 +606,7 @@
         // سڕینەوە بە OpenCV
         async function removeSelectedAreas() {
             loadingOverlay.style.display = 'flex';
+            progressBar.style.width = '0%';
             
             try {
                 await waitForOpenCV(async () => {
@@ -455,10 +628,12 @@
                     
                     if (!hasMask) {
                         alert('تکایە یەکێک لە ناوچەکانی وێنە دیاری بکە بە فرچەکە پێش سڕینەوە!');
+                        loadingOverlay.style.display = 'none';
                         return;
                     }
 
                     saveToHistory();
+                    progressBar.style.width = '20%';
                     
                     // دروستکردنی کەنڤاسی سەرچاوە بە قەبارەی ڕاستەقینە
                     const sourceCanvas = document.createElement('canvas');
@@ -466,6 +641,8 @@
                     sourceCanvas.height = originalImage.naturalHeight;
                     const sourceCtx = sourceCanvas.getContext('2d');
                     sourceCtx.drawImage(originalImage, 0, 0, sourceCanvas.width, sourceCanvas.height);
+                    
+                    progressBar.style.width = '40%';
                     
                     // دروستکردنی ماسک بە قەبارەی ڕاستەقینە
                     const fullSizeMask = document.createElement('canvas');
@@ -476,18 +653,27 @@
                     // گەورەکردنی ماسک
                     fullSizeMaskCtx.drawImage(maskCanvas, 0, 0, fullSizeMask.width, fullSizeMask.height);
                     
+                    progressBar.style.width = '60%';
+                    
                     // دروستکردنی ماسکی OpenCV
                     const maskImageData = fullSizeMaskCtx.getImageData(0, 0, fullSizeMask.width, fullSizeMask.height);
                     const maskData = maskImageData.data;
                     
                     // گۆڕینی ماسک بۆ شێوەی OpenCV
                     for (let i = 0; i < maskData.length; i += 4) {
-                        // ئەگەر سوور بوو (ماسک) بیکە بە سپی، وەک نەبێت بیکە بە ڕەش
-                        maskData[i] = maskData[i+1] = maskData[i+2] = 255;  // سپی
-                        maskData[i+3] = maskData[i] > 0 ? 255 : 0;  // A
+                        // ئەگەر سپی بوو (ماسک) بیکە بە سپی، وەک نەبێت بیکە بە ڕەش
+                        if (maskData[i] > 128) { // ئەگەر ڕەنگی سپی یان نزیک لە سپی
+                            maskData[i] = maskData[i+1] = maskData[i+2] = 255;  // سپی
+                            maskData[i+3] = 255;  // A
+                        } else {
+                            maskData[i] = maskData[i+1] = maskData[i+2] = 0;  // ڕەش
+                            maskData[i+3] = 255;  // A
+                        }
                     }
                     
                     fullSizeMaskCtx.putImageData(maskImageData, 0, 0);
+                    
+                    progressBar.style.width = '80%';
                     
                     // کرداری سڕینەوە
                     const src = cv.imread(sourceCanvas);
@@ -495,6 +681,7 @@
                     const dst = new cv.Mat();
                     
                     cv.cvtColor(mask, mask, cv.COLOR_RGBA2GRAY);
+                    cv.threshold(mask, mask, 128, 255, cv.THRESH_BINARY);
                     cv.inpaint(src, mask, dst, 3, cv.INPAINT_TELEA);
                     
                     // هەڵگرتنی ئەنجام
@@ -517,18 +704,28 @@
                     src.delete();
                     mask.delete();
                     dst.delete();
+                    
+                    progressBar.style.width = '100%';
                 });
             } catch (error) {
                 console.error('هەڵە لە پرۆسەی سڕینەوە:', error);
                 alert('هەڵەیەک ڕوویدا لە پرۆسەی سڕینەوە: ' + error.message);
             } finally {
-                loadingOverlay.style.display = 'none';
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                }, 500);
             }
         }
 
         // پاشەکەوتکردنی مێژوو
         function saveToHistory() {
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+            
+            const imageData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
             imageHistory.push(imageData);
             if (imageHistory.length > 10) {
                 imageHistory.shift();
@@ -540,28 +737,89 @@
             if (imageHistory.length > 1) {
                 imageHistory.pop();
                 const prevState = imageHistory[imageHistory.length - 1];
-                ctx.putImageData(prevState, 0, 0);
-                maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+                
+                // دروستکردنی وێنەی پێشوو
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.putImageData(prevState, 0, 0);
+                
+                // نوێکردنەوەی وێنەی سەرەکی
+                originalImage.src = tempCanvas.toDataURL();
+                originalImage.onload = function() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+                    maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+                };
             }
         }
 
         // دابەزاندن
         function downloadImage() {
             const link = document.createElement('a');
-            link.download = 'وێنەی_چاککراو.png';
-            link.href = canvas.toDataURL();
+            link.download = 'وێنەی_چاککراو_' + new Date().toISOString().slice(0, 10) + '.png';
+            link.href = canvas.toDataURL('image/png', 1.0);
             link.click();
+            
+            // ئەنیمەیشنی دابەزاندن
+            link.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                link.style.transform = 'scale(1)';
+            }, 300);
         }
 
         // بەستەرەکان
         brushSizeSlider.addEventListener('input', function(e) {
-            brushSize = e.target.value;
+            brushSize = parseInt(e.target.value);
             brushSizeValue.textContent = brushSize;
+            
+            // ئەنیمەیشنی گۆڕینی قەبارەی فرچە
+            brushPreview.style.transition = 'width 0.2s ease, height 0.2s ease';
+            brushPreview.style.width = brushSize + 'px';
+            brushPreview.style.height = brushSize + 'px';
+            
+            setTimeout(() => {
+                brushPreview.style.transition = '';
+            }, 200);
         });
 
-        removeBtn.addEventListener('click', removeSelectedAreas);
-        undoBtn.addEventListener('click', undo);
-        downloadBtn.addEventListener('click', downloadImage);
+        removeBtn.addEventListener('click', function() {
+            this.classList.add('active');
+            setTimeout(() => {
+                this.classList.remove('active');
+            }, 300);
+            removeSelectedAreas();
+        });
+
+        undoBtn.addEventListener('click', function() {
+            this.classList.add('active');
+            setTimeout(() => {
+                this.classList.remove('active');
+            }, 300);
+            undo();
+        });
+
+        downloadBtn.addEventListener('click', function() {
+            this.classList.add('active');
+            setTimeout(() => {
+                this.classList.remove('active');
+            }, 300);
+            downloadImage();
+        });
+
+        // نمایشی فرچە کاتێک ماوسەکە بەسەر کەنڤاسەکەدا دەڕوات
+        canvas.addEventListener('mousemove', function(e) {
+            updateBrushPreview(e);
+        });
+
+        canvas.addEventListener('mouseenter', function() {
+            brushPreview.style.display = 'block';
+        });
+
+        canvas.addEventListener('mouseleave', function() {
+            brushPreview.style.display = 'none';
+        });
     </script>
 </body>
 </html>
