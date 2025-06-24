@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سڕینەوەی زیرەکی شت لە وێنە</title>
-    <!-- TensorFlow.js -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
-    <!-- OpenCV.js -->
     <script async src="https://docs.opencv.org/4.5.5/opencv.js" onload="onOpenCvReady();"></script>
-    <!-- فۆنتەکە بۆ کوردی -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -467,11 +464,26 @@
                 // گەورەکردنی ماسک
                 fullSizeMaskCtx.drawImage(maskCanvas, 0, 0, fullSizeMask.width, fullSizeMask.height);
                 
+                // دروستکردنی ماسکی OpenCV
+                const maskImageData = fullSizeMaskCtx.getImageData(0, 0, fullSizeMask.width, fullSizeMask.height);
+                const maskData = maskImageData.data;
+                
+                // گۆڕینی ماسک بۆ شێوەی OpenCV (تەنها کەناڵی سوور)
+                for (let i = 0; i < maskData.length; i += 4) {
+                    maskData[i] = 0;      // R
+                    maskData[i+1] = 0;    // G
+                    maskData[i+2] = 0;    // B
+                    maskData[i+3] = maskData[i] > 0 ? 255 : 0;  // A (سفید برای مناطق ماسک)
+                }
+                
+                fullSizeMaskCtx.putImageData(maskImageData, 0, 0);
+                
                 // کرداری سڕینەوە
                 const src = cv.imread(sourceCanvas);
                 const mask = cv.imread(fullSizeMask);
                 const dst = new cv.Mat();
                 
+                cv.cvtColor(mask, mask, cv.COLOR_RGBA2GRAY);
                 cv.inpaint(src, mask, dst, 3, cv.INPAINT_TELEA);
                 
                 // هەڵگرتنی ئەنجام
@@ -495,7 +507,7 @@
                 maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
             } catch (error) {
                 console.error('هەڵە لە پرۆسەی سڕینەوە:', error);
-                alert('هەڵەیەک ڕوویدا لە پرۆسەی سڕینەوە!');
+                alert('هەڵەیەک ڕوویدا لە پرۆسەی سڕینەوە: ' + error.message);
             } finally {
                 // لەکارخستنی بارگەی چاوەڕوانی
                 loadingOverlay.style.display = 'none';
