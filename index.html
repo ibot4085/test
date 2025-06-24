@@ -418,6 +418,7 @@
         let imageHistory = [];
         let scaleFactor = 1;
         let cvLoadCheckInterval;
+        let lastClickTime = 0;
 
         // دەستپێکردن
         removeBtn.disabled = true;
@@ -500,15 +501,20 @@
         // ماسک کردن
         canvas.addEventListener('mousedown', function(e) {
             e.preventDefault();
+            const now = Date.now();
+            if (now - lastClickTime < 300) { // Double click detection
+                return;
+            }
+            lastClickTime = now;
+            
             isDrawing = true;
             drawMask(e);
+            
+            // Immediately remove the selected area
+            removeSelectedAreas();
         });
 
         canvas.addEventListener('mousemove', function(e) {
-            if (isDrawing) {
-                e.preventDefault();
-                drawMask(e);
-            }
             updateBrushPreview(e);
         });
 
@@ -576,15 +582,19 @@
             const x = (e.clientX - rect.left) * scaleX;
             const y = (e.clientY - rect.top) * scaleY;
             
+            // Clear previous mask
+            maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+            
+            // Create new mask with red color to show the selected area
             maskCtx.globalCompositeOperation = 'source-over';
             maskCtx.fillStyle = 'rgba(255, 0, 0, 0.5)';
             maskCtx.beginPath();
             maskCtx.arc(x, y, brushSize/2, 0, Math.PI * 2);
             maskCtx.fill();
             
-            // دروستکردنی ماسکی بەهێزتر بۆ OpenCV
+            // Create a stronger mask for OpenCV (white)
             maskCtx.globalCompositeOperation = 'source-over';
-            maskCtx.fillStyle = 'rgba(255, 255, 255, 1)'; // سپی بە تەواوی بۆ ماسک
+            maskCtx.fillStyle = 'rgba(255, 255, 255, 1)';
             maskCtx.beginPath();
             maskCtx.arc(x, y, brushSize/2, 0, Math.PI * 2);
             maskCtx.fill();
@@ -627,7 +637,6 @@
                     }
                     
                     if (!hasMask) {
-                        alert('تکایە یەکێک لە ناوچەکانی وێنە دیاری بکە بە فرچەکە پێش سڕینەوە!');
                         loadingOverlay.style.display = 'none';
                         return;
                     }
