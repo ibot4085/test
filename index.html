@@ -3,189 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- لە بەشی head زیاترەکانی زیاد بکە -->
-<script async src="https://docs.opencv.org/4.5.5/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
-
-<!-- لە بەشی script گۆڕانکارییەکان -->
-<script>
-    let cvReady = false;
-    
-    function onOpenCvReady() {
-        cvReady = true;
-        console.log('OpenCV.js بارکرا بە سەرکەوتوویی');
-    }
-
-    // گۆڕانی فەنکشنی removeSelectedAreas
-    async function removeSelectedAreas() {
-        if (!maskCanvas) return;
-
-        saveToHistory();
-        showAILoading("AI کاردەکات لەسەر وێنەکە...");
-
-        try {
-            // بەکارهێنانی OpenCV بۆ سڕینەوەی باشتر
-            if (cvReady) {
-                await removeWithOpenCV();
-            } else {
-                // بەکارهێنانی تەکنیکی پێشوو ئەگەر OpenCV بارنەکرابێت
-                await removeWithTF();
-            }
-            
-            updateProgress(100);
-        } catch (error) {
-            console.error("هەڵە لە سڕینەوە:", error);
-            alert("هەڵە لە کاتی سڕینەوە بە یارمەتی AI");
-        } finally {
-            hideAILoading();
-        }
-    }
-
-    async function removeWithOpenCV() {
-        return new Promise((resolve) => {
-            // گۆڕینی وێنە بۆ OpenCV Mat
-            const img = cv.imread(canvas);
-            const mask = cv.imread(maskCanvas);
-            
-            // دروستکردنی ماسکی ڕەنگ خاکەری
-            const grayMask = new cv.Mat();
-            cv.cvtColor(mask, grayMask, cv.COLOR_RGBA2GRAY);
-            
-            // دروستکردنی ماسکی باینەری
-            const binaryMask = new cv.Mat();
-            cv.threshold(grayMask, binaryMask, 10, 255, cv.THRESH_BINARY);
-            
-            // سڕینەوەی بە تەکنیکی inpainting
-            const result = new cv.Mat();
-            cv.inpaint(img, binaryMask, result, 3, cv.INPAINT_TELEA);
-            
-            // گەڕاندنەوەی ئەنجامەکە بۆ کەنڤاس
-            cv.imshow(canvas, result);
-            
-            // پاککردنەوەی سەرچاوەکان
-            img.delete();
-            mask.delete();
-            grayMask.delete();
-            binaryMask.delete();
-            result.delete();
-            
-            resolve();
-        });
-    }
-
-    async function removeWithTF() {
-        // کۆدی پێشوو بەکاربهێنە ئەگەر OpenCV بارنەکرابێت
-        const maskData = maskCtx.getImageData(0, 0, canvas.width, canvas.height);
-        let segmentation = null;
-        
-        if (aiModel && smartMode) {
-            segmentation = await aiModel.segmentPerson(canvas, {
-                flipHorizontal: false,
-                internalResolution: (aiPrecision > 70) ? 'high' : (aiPrecision > 40) ? 'medium' : 'low',
-                segmentationThreshold: aiPrecision / 100
-            });
-            updateProgress(50);
-        }
-
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = canvas.width;
-        tempCanvas.height = canvas.height;
-        const tempCtx = tempCanvas.getContext('2d');
-        tempCtx.drawImage(canvas, 0, 0);
-        
-        await applyAIInpainting(tempCtx, maskData, segmentation);
-        ctx.drawImage(tempCanvas, 0, 0);
-        maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
-    }
-
-    // باشترکردنی فەنکشنی enhanceWithAI
-    async function enhanceWithAI() {
-        if (!originalImage || isAILoading) return;
-        
-        saveToHistory();
-        showAILoading("باشترکردنی وێنە بە یارمەتی AI...");
-        
-        try {
-            if (cvReady) {
-                await enhanceWithOpenCV();
-            } else {
-                await enhanceWithBasic();
-            }
-            
-            updateProgress(100);
-            alert("وێنەکەت بە سەرکەوتوویی باشترکرایەوە بە یارمەتی AI!");
-        } catch (error) {
-            console.error("هەڵە لە باشترکردن:", error);
-            alert("هەڵە لە باشترکردنی وێنە بە یارمەتی AI");
-        } finally {
-            hideAILoading();
-        }
-    }
-
-    async function enhanceWithOpenCV() {
-        return new Promise((resolve) => {
-            const img = cv.imread(canvas);
-            
-            // ڕەش و سپی کردنی وێنە بۆ دۆزینەوەی لێوارەکان
-            const gray = new cv.Mat();
-            cv.cvtColor(img, gray, cv.COLOR_RGBA2GRAY);
-            
-            // باشترکردنی لێوارەکان
-            const edges = new cv.Mat();
-            cv.Canny(gray, edges, 50, 150);
-            
-            // زیادکردنی تیزی بۆ وێنەکە
-            const sharpened = new cv.Mat();
-            cv.GaussianBlur(img, sharpened, new cv.Size(0, 0), 3);
-            cv.addWeighted(img, 1.5, sharpened, -0.5, 0, sharpened);
-            
-            // زیادکردنی ڕووناکی و کۆنتراست
-            const lab = new cv.Mat();
-            cv.cvtColor(sharpened, lab, cv.COLOR_RGBA2RGB);
-            cv.cvtColor(lab, lab, cv.COLOR_RGB2Lab);
-            
-            const labPlanes = new cv.MatVector();
-            cv.split(lab, labPlanes);
-            
-            const clahe = cv.createCLAHE(2.0, new cv.Size(8, 8));
-            clahe.apply(labPlanes.get(0), labPlanes.get(0));
-            
-            cv.merge(labPlanes, lab);
-            cv.cvtColor(lab, lab, cv.COLOR_Lab2RGB);
-            cv.cvtColor(lab, lab, cv.COLOR_RGB2RGBA);
-            
-            // نیشاندانی ئەنجامەکە
-            cv.imshow(canvas, lab);
-            
-            // پاککردنەوەی سەرچاوەکان
-            img.delete();
-            gray.delete();
-            edges.delete();
-            sharpened.delete();
-            lab.delete();
-            labPlanes.delete();
-            clahe.delete();
-            
-            resolve();
-        });
-    }
-
-    async function enhanceWithBasic() {
-        // کۆدی پێشوو بەکاربهێنە ئەگەر OpenCV بارنەکرابێت
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        applyEnhancementFilter(imageData.data);
-        ctx.putImageData(imageData, 0, 0);
-    }
-</script>
     <title>سڕینەوەی زیرەکی شت لە وێنە</title>
     <!-- TensorFlow.js and BodyPix for AI capabilities -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@latest"></script>
-    <!-- OpenCV.js -->
-    <script async src="https://docs.opencv.org/4.5.5/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
     <style>
         * {
             margin: 0;
-@@ -195,640 +24,21 @@
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
             direction: rtl;
         }
 
@@ -321,14 +154,18 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             background: #f8f9fa;
             border: 1px solid #e2e8f0;
+            max-height: 70vh;
+            display: flex;
+            flex-direction: column;
         }
 
         #imageCanvas {
             max-width: 100%;
-            height: auto;
+            max-height: 100%;
             display: block;
             cursor: crosshair;
             transition: transform 0.3s ease;
+            margin: 0 auto;
         }
 
         #imageCanvas:hover {
@@ -623,6 +460,27 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Animation for image appearance */
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .image-appear {
+            animation: fadeInScale 0.5s ease-out forwards;
+        }
+
+        /* Animation for brush stroke */
+        @keyframes brushStroke {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.9; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .brush-stroke {
+            animation: brushStroke 0.3s ease-out;
+        }
+
         @media (max-width: 768px) {
             .editor-container {
                 grid-template-columns: 1fr;
@@ -676,9 +534,7 @@
             cursor: pointer;
             flex-grow: 1;
         }
-        /* هەموو ستایلەکانی پێشوو لێرەدا بمێننەوە */
-        /* ... */
-
+        
         .ai-mode-toggle .toggle-switch {
             position: relative;
             width: 50px;
@@ -742,7 +598,7 @@
 
         <div class="editor-container" id="editorContainer">
             <div class="canvas-container">
-                <canvas id="imageCanvas"></canvas>
+                <canvas id="imageCanvas" class="image-appear"></canvas>
                 <div class="progress-bar" id="progressBar">
                     <div class="progress" id="progress"></div>
                 </div>
@@ -822,20 +678,40 @@
         <div class="creator-credit">
             Created by Ibrahim Mala Taha | Powered by TensorFlow.js
         </div>
-        <!-- هەموو بەشەکانی HTML بمێننەوە -->
-        <!-- ... -->
     </div>
 
     <script>
-        // گۆڕاوەکانی سەرەتا
         const canvas = document.getElementById('imageCanvas');
         const ctx = canvas.getContext('2d');
         const fileInput = document.getElementById('fileInput');
-@@ -860,597 +70,165 @@
+        const uploadSection = document.getElementById('uploadSection');
+        const editorContainer = document.getElementById('editorContainer');
+        const brushSizeSlider = document.getElementById('brushSize');
+        const brushSizeValue = document.getElementById('brushSizeValue');
+        const brushPreview = document.getElementById('brushPreview');
+        const smartModeCheckbox = document.getElementById('smartMode');
+        const removeBtn = document.getElementById('removeBtn');
+        const undoBtn = document.getElementById('undoBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const aiEnhanceBtn = document.getElementById('aiEnhanceBtn');
+        const aiPrecisionSlider = document.getElementById('aiPrecision');
+        const aiPrecisionValue = document.getElementById('aiPrecisionValue');
+        const progressBar = document.getElementById('progressBar');
+        const progress = document.getElementById('progress');
+        const aiLoading = document.getElementById('aiLoading');
+
+        let originalImage = null;
+        let maskCanvas = null;
+        let maskCtx = null;
+        let isDrawing = false;
+        let brushSize = 20;
+        let smartMode = true;
+        let aiPrecision = 70;
+        let imageHistory = [];
+        let customCursor = null;
         let lastDrawPoint = null;
         let aiModel = null;
         let isAILoading = false;
-        let cvReady = false;
 
         // Initialize
         updateBrushPreview();
@@ -939,10 +815,6 @@
                 console.error("Error loading AI model:", error);
                 alert("هەڵە لە بارکردنی مۆدێلی AI. تکایە دووبارە هەوڵبەرەوە.");
             }
-        // فەنکشنی بارکردنی OpenCV
-        function onOpenCvReady() {
-            cvReady = true;
-            console.log('OpenCV.js بارکرا بە سەرکەوتوویی');
         }
 
         function showAILoading(message) {
@@ -987,6 +859,12 @@
                     uploadSection.style.display = 'none';
                     editorContainer.style.display = 'grid';
                     saveToHistory();
+                    
+                    // Add animation class to canvas
+                    canvas.classList.add('image-appear');
+                    setTimeout(() => {
+                        canvas.classList.remove('image-appear');
+                    }, 500);
                 };
                 img.src = e.target.result;
             };
@@ -994,17 +872,35 @@
         }
 
         function setupCanvas(img) {
-            // Set canvas size to match image
-            canvas.width = img.width;
-            canvas.height = img.height;
+            // Calculate the maximum dimensions while maintaining aspect ratio
+            const maxWidth = window.innerWidth * 0.7;
+            const maxHeight = window.innerHeight * 0.7;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth) {
+                const ratio = maxWidth / width;
+                width = maxWidth;
+                height = height * ratio;
+            }
+
+            if (height > maxHeight) {
+                const ratio = maxHeight / height;
+                height = maxHeight;
+                width = width * ratio;
+            }
+
+            // Set canvas size
+            canvas.width = width;
+            canvas.height = height;
             
             // Draw image on main canvas
-            ctx.drawImage(img, 0, 0);
+            ctx.drawImage(img, 0, 0, width, height);
             
             // Create mask canvas
             maskCanvas = document.createElement('canvas');
-            maskCanvas.width = img.width;
-            maskCanvas.height = img.height;
+            maskCanvas.width = width;
+            maskCanvas.height = height;
             maskCtx = maskCanvas.getContext('2d');
             
             // Create custom cursor
@@ -1118,7 +1014,7 @@
 
             // Draw mask overlay on main canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(originalImage, 0, 0);
+            ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
             
             // Apply glowing mask effect
             ctx.globalCompositeOperation = 'source-over';
@@ -1205,10 +1101,7 @@
             }
             return false;
         }
-        // فەنکشنەکانی تر بمێننەوە
-        // ...
 
-        // فەنکشنی نوێ بۆ سڕینەوە بە OpenCV
         async function removeSelectedAreas() {
             if (!maskCanvas) return;
 
@@ -1228,10 +1121,6 @@
                         segmentationThreshold: aiPrecision / 100
                     });
                     updateProgress(50);
-                if (cvReady) {
-                    await removeWithOpenCV();
-                } else {
-                    await removeWithTF();
                 }
 
                 // Create a temporary canvas for processing
@@ -1240,7 +1129,7 @@
                 tempCanvas.height = canvas.height;
                 const tempCtx = tempCanvas.getContext('2d');
                 tempCtx.drawImage(canvas, 0, 0);
-
+                
                 // Apply the removal with AI assistance
                 await applyAIInpainting(tempCtx, maskData, segmentation);
                 updateProgress(100);
@@ -1250,9 +1139,14 @@
                 
                 // Clear mask
                 maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+                
+                // Add animation effect
+                canvas.classList.add('brush-stroke');
+                setTimeout(() => {
+                    canvas.classList.remove('brush-stroke');
+                }, 300);
             } catch (error) {
                 console.error("Error in AI removal:", error);
-                console.error("هەڵە لە سڕینەوە:", error);
                 alert("هەڵە لە کاتی سڕینەوە بە یارمەتی AI");
             } finally {
                 hideAILoading();
@@ -1260,18 +1154,13 @@
         }
 
         async function applyAIInpainting(tempCtx, maskData, segmentation) {
-        async function removeWithOpenCV() {
             return new Promise((resolve) => {
                 // Simulate processing with progress updates
                 const totalPixels = canvas.width * canvas.height;
                 const batchSize = Math.floor(totalPixels / 10);
-                const img = cv.imread(canvas);
-                const mask = cv.imread(maskCanvas);
-
+                
                 const imageData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
-                const grayMask = new cv.Mat();
-                cv.cvtColor(mask, grayMask, cv.COLOR_RGBA2GRAY);
-
+                
                 for (let i = 0; i < totalPixels; i++) {
                     const x = i % canvas.width;
                     const y = Math.floor(i / canvas.width);
@@ -1297,20 +1186,7 @@
                         updateProgress(50 + (progress / 2));
                     }
                 }
-                const binaryMask = new cv.Mat();
-                cv.threshold(grayMask, binaryMask, 10, 255, cv.THRESH_BINARY);
                 
-                const result = new cv.Mat();
-                cv.inpaint(img, binaryMask, result, 3, cv.INPAINT_TELEA);
-                
-                cv.imshow(canvas, result);
-                
-                img.delete();
-                mask.delete();
-                grayMask.delete();
-                binaryMask.delete();
-                result.delete();
-
                 tempCtx.putImageData(imageData, 0, 0);
                 resolve();
             });
@@ -1320,10 +1196,7 @@
             let r = 0, g = 0, b = 0, count = 0;
             const radius = Math.max(brushSize, 25);
             const precisionFactor = aiPrecision / 50; // Higher precision = more samples
-        async function removeWithTF() {
-            const maskData = maskCtx.getImageData(0, 0, canvas.width, canvas.height);
-            let segmentation = null;
-
+            
             // Sample in a spiral pattern for better blending
             for (let angle = 0; angle < Math.PI * 2 * precisionFactor; angle += 0.2) {
                 for (let dist = 5; dist <= radius; dist += 3) {
@@ -1348,13 +1221,6 @@
             if (count === 0) {
                 // Fallback to nearby pixels if no samples found
                 return getFallbackColor(imageData, x, y);
-            if (aiModel && smartMode) {
-                segmentation = await aiModel.segmentPerson(canvas, {
-                    flipHorizontal: false,
-                    internalResolution: (aiPrecision > 70) ? 'high' : (aiPrecision > 40) ? 'medium' : 'low',
-                    segmentationThreshold: aiPrecision / 100
-                });
-                updateProgress(50);
             }
 
             return {
@@ -1382,40 +1248,27 @@
                     }
                 }
             }
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = canvas.width;
-            tempCanvas.height = canvas.height;
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCtx.drawImage(canvas, 0, 0);
-
+            
             return {
                 r: count > 0 ? Math.round(r / count) : 240,
                 g: count > 0 ? Math.round(g / count) : 240,
                 b: count > 0 ? Math.round(b / count) : 240
             };
-            await applyAIInpainting(tempCtx, maskData, segmentation);
-            ctx.drawImage(tempCanvas, 0, 0);
-            maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
         }
 
-        // فەنکشنی نوێ بۆ باشترکردن بە OpenCV
         async function enhanceWithAI() {
             if (!originalImage || isAILoading) return;
-
+            
             saveToHistory();
             showAILoading("باشترکردنی وێنە بە یارمەتی AI...");
-
+            
             try {
                 // Simulate AI enhancement (in a real app, you'd use actual AI processing)
                 for (let i = 0; i <= 100; i += 10) {
                     updateProgress(i);
                     await new Promise(resolve => setTimeout(resolve, 100));
-                if (cvReady) {
-                    await enhanceWithOpenCV();
-                } else {
-                    await enhanceWithBasic();
                 }
-
+                
                 // In a real implementation, you would:
                 // 1. Send the image to an AI enhancement API
                 // 2. Process the image with TensorFlow.js filters
@@ -1430,7 +1283,6 @@
                 alert("وێنەکەت بە سەرکەوتوویی باشترکرایەوە بە یارمەتی AI!");
             } catch (error) {
                 console.error("Error in AI enhancement:", error);
-                console.error("هەڵە لە باشترکردن:", error);
                 alert("هەڵە لە باشترکردنی وێنە بە یارمەتی AI");
             } finally {
                 hideAILoading();
@@ -1450,50 +1302,9 @@
                     ));
                 }
             }
-        async function enhanceWithOpenCV() {
-            return new Promise((resolve) => {
-                const img = cv.imread(canvas);
-                
-                const gray = new cv.Mat();
-                cv.cvtColor(img, gray, cv.COLOR_RGBA2GRAY);
-                
-                const edges = new cv.Mat();
-                cv.Canny(gray, edges, 50, 150);
-                
-                const sharpened = new cv.Mat();
-                cv.GaussianBlur(img, sharpened, new cv.Size(0, 0), 3);
-                cv.addWeighted(img, 1.5, sharpened, -0.5, 0, sharpened);
-                
-                const lab = new cv.Mat();
-                cv.cvtColor(sharpened, lab, cv.COLOR_RGBA2RGB);
-                cv.cvtColor(lab, lab, cv.COLOR_RGB2Lab);
-                
-                const labPlanes = new cv.MatVector();
-                cv.split(lab, labPlanes);
-                
-                const clahe = cv.createCLAHE(2.0, new cv.Size(8, 8));
-                clahe.apply(labPlanes.get(0), labPlanes.get(0));
-                
-                cv.merge(labPlanes, lab);
-                cv.cvtColor(lab, lab, cv.COLOR_Lab2RGB);
-                cv.cvtColor(lab, lab, cv.COLOR_RGB2RGBA);
-                
-                cv.imshow(canvas, lab);
-                
-                img.delete();
-                gray.delete();
-                edges.delete();
-                sharpened.delete();
-                lab.delete();
-                labPlanes.delete();
-                clahe.delete();
-                
-                resolve();
-            });
         }
 
         function saveToHistory() {
-        async function enhanceWithBasic() {
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             imageHistory.push(imageData);
             
@@ -1501,8 +1312,6 @@
             if (imageHistory.length > 10) {
                 imageHistory.shift();
             }
-            applyEnhancementFilter(imageData.data);
-            ctx.putImageData(imageData, 0, 0);
         }
 
         function undo() {
@@ -1517,8 +1326,6 @@
                 }
             }
         }
-        // فەنکشنەکانی پێشوو بمێننەوە
-        // ...
 
         function downloadImage() {
             const link = document.createElement('a');
